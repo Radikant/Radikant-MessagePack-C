@@ -1,0 +1,12 @@
+[submodule "lib/Radikant-Probe-C"]
+	path = lib/Radikant-Probe-C
+	url = https://github.com/Radikant/Radikant-Probe-C.git
+	branch = main
+[submodule "lib/Radikant-Socket-C"]
+	path = lib/Radikant-Socket-C
+	url = https://github.com/Radikant/Radikant-Socket-C.git
+	branch = main
+[submodule "lib/Radikant-Log-C"]
+	path = lib/Radikant-Log-C
+	url = https://github.com/Radikant/Radikant-Log-C.git
+	branch = main

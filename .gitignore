@@ -1,0 +1,15 @@
+# Ignore build artifacts
+
+# Build artifacts
+build
+build_asan
+build_tsan
+
+# macOS 
+.DS_Store
+
+# VS Code 
+.vscode
+
+# Cache
+.cache
