@@ -1,5 +1,5 @@
-#ifndef RADIKANT_MESSAGEPACK_C_H
-#define RADIKANT_MESSAGEPACK_C_H
+#ifndef RADIKANT_MESSAGEPACK_C_LIB_H
+#define RADIKANT_MESSAGEPACK_C_LIB_H
 
 #include "../SRC/messagepack.h"
 

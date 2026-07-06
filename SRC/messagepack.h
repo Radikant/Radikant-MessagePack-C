@@ -5,8 +5,13 @@
 extern "C" {
 #endif
 
+typedef enum {
+  MP_OK,
+  MP_FAIL,
+} mp_error_t;
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // RADIKANT_WEBRTC_CLIENT_H
+#endif // RADIKANT_MESSAGEPACK_H

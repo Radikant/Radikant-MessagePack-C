@@ -22,7 +22,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ---- Build shared library ----
 add_library(Radikant-MessagePack-C SHARED
     SRC/messagepack.c
-
+    SRC/encoder.c
+    SRC/decoder.c
+    SRC/types.c
+    SRC/skip.c
 )
 
 # ---- Includess ----
