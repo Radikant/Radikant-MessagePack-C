@@ -6,7 +6,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "../SRC/messagepack.h"
+#include "../include/radikant-messagepack-c.h"
 #include "probe.h"
 
 #ifndef PROJECT_ROOT

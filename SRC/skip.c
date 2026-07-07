@@ -192,3 +192,16 @@ mp_error_t mp_skip(mp_decoder_t* decoder) {
             return MP_ERROR_DECODE_INVALID_FORMAT;
     }
 }
+
+mp_error_t mp_skip_memory(const char* data, size_t size) {
+    if (!data) return MP_ERROR_BAD_ARG;
+
+    mp_stream_t stream;
+    mp_memory_stream_ctx_t ctx;
+    mp_memory_stream_init_read(&stream, &ctx, data, size);
+
+    mp_decoder_t decoder;
+    mp_decoder_init(&decoder, &stream, NULL);
+
+    return mp_skip(&decoder);
+}

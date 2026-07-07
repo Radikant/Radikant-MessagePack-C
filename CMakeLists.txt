@@ -27,7 +27,6 @@ endif()
 
 # ---- Build shared library ----
 add_library(Radikant-MessagePack-C SHARED
-    SRC/messagepack.c
     SRC/encoder.c
     SRC/decoder.c
     SRC/types.c

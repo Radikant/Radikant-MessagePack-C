@@ -1,10 +1,14 @@
-#include "../SRC/messagepack.h"
+#include "../include/radikant-messagepack-c.h"
 #include "probe.h"
 #include <stdio.h>
 #include <string.h>
 
 bool msgpack_test_encode_decode(test_result_t *test);
-
+bool msgpack_test_bin(test_result_t *test);
+bool msgpack_test_ext(test_result_t *test);
+bool msgpack_test_map(test_result_t *test);
+bool msgpack_test_nil(test_result_t *test);
+bool msgpack_test_type_casting(test_result_t *test);
 test_suite_t suite_msgpack = {
     .name = "MessagePack Stream/API Suite",
     .standard = "MsgPack-Protocol"
@@ -15,7 +19,11 @@ int main(void) {
     enable_memleak_detection(&suite_msgpack);
 
     add_test(&suite_msgpack, msgpack_test_encode_decode, "Encode/Decode via Streams", "MsgPack-Spec");
-
+    add_test(&suite_msgpack, msgpack_test_bin, "Encode/Decode Binary", "MsgPack-Spec");
+    add_test(&suite_msgpack, msgpack_test_ext, "Encode/Decode Extension", "MsgPack-Spec");
+    add_test(&suite_msgpack, msgpack_test_map, "Encode/Decode Map", "MsgPack-Spec");
+    add_test(&suite_msgpack, msgpack_test_nil, "Encode/Decode Nil", "MsgPack-Spec");
+    add_test(&suite_msgpack, msgpack_test_type_casting, "Safe Type Casting Safeguards", "MsgPack-Spec");
     register_suite(&suite_msgpack);
     bool success = run_all_suites();
 
@@ -83,6 +91,151 @@ bool msgpack_test_encode_decode(test_result_t *test) {
 
     mp_zone_destroy(&zone);
     mp_memory_stream_destroy(&write_ctx);
+
+    return test_end(test);
+}
+
+bool msgpack_test_bin(test_result_t *test) {
+    mp_stream_t write_stream;
+    mp_memory_stream_ctx_t write_ctx;
+    mp_memory_stream_init_write_dynamic(&write_stream, &write_ctx);
+
+    const char* bin_data = "\x00\x01\x02\xFF";
+    mp_encode_bin(&write_stream, bin_data, 4);
+
+    mp_zone_t zone;
+    mp_zone_init(&zone, 4096);
+    mp_object_t obj;
+    mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+
+    if (err != MP_OK) {
+        append_error(test, "Decode failed", err);
+    } else {
+        const char* out_bin;
+        uint32_t out_len;
+        if (mp_object_as_bin(&obj, &out_bin, &out_len) != MP_OK) {
+            append_error(test, "Expected BIN type", obj.type);
+        } else if (out_len != 4 || memcmp(out_bin, bin_data, 4) != 0) {
+            append_error(test, "Binary data mismatch", 0);
+        }
+    }
+
+    mp_zone_destroy(&zone);
+    mp_memory_stream_destroy(&write_ctx);
+    return test_end(test);
+}
+
+bool msgpack_test_ext(test_result_t *test) {
+    mp_stream_t write_stream;
+    mp_memory_stream_ctx_t write_ctx;
+    mp_memory_stream_init_write_dynamic(&write_stream, &write_ctx);
+
+    const char* ext_data = "custom";
+    mp_encode_ext(&write_stream, 42, ext_data, 6);
+
+    mp_zone_t zone;
+    mp_zone_init(&zone, 4096);
+    mp_object_t obj;
+    mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+
+    if (err != MP_OK) {
+        append_error(test, "Decode failed", err);
+    } else {
+        int8_t out_type;
+        const char* out_data;
+        uint32_t out_len;
+        if (mp_object_as_ext(&obj, &out_type, &out_data, &out_len) != MP_OK) {
+            append_error(test, "Expected EXT type", obj.type);
+        } else if (out_type != 42 || out_len != 6 || memcmp(out_data, ext_data, 6) != 0) {
+            append_error(test, "Extension data/type mismatch", 0);
+        }
+    }
+
+    mp_zone_destroy(&zone);
+    mp_memory_stream_destroy(&write_ctx);
+    return test_end(test);
+}
+
+bool msgpack_test_map(test_result_t *test) {
+    mp_stream_t write_stream;
+    mp_memory_stream_ctx_t write_ctx;
+    mp_memory_stream_init_write_dynamic(&write_stream, &write_ctx);
+
+    mp_encode_map_len(&write_stream, 1);
+    mp_encode_str(&write_stream, "key", 3);
+    mp_encode_int(&write_stream, 123);
+
+    mp_zone_t zone;
+    mp_zone_init(&zone, 4096);
+    mp_object_t obj;
+    mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+
+    if (err != MP_OK) {
+        append_error(test, "Decode failed", err);
+    } else {
+        mp_object_kv_t* elements;
+        uint32_t len;
+        if (mp_object_as_map(&obj, &elements, &len) != MP_OK) {
+            append_error(test, "Expected MAP type", obj.type);
+        } else if (len != 1) {
+            append_error(test, "Expected map size 1", len);
+        } else {
+            const char* k_str; uint32_t k_len;
+            if (mp_object_as_str(elements[0].key, &k_str, &k_len) != MP_OK || k_len != 3 || strncmp(k_str, "key", 3) != 0) {
+                append_error(test, "Map key mismatch", 0);
+            }
+            int64_t v_int;
+            if (mp_object_as_int(elements[0].val, &v_int) != MP_OK || v_int != 123) {
+                append_error(test, "Map value mismatch", 0);
+            }
+        }
+    }
+
+    mp_zone_destroy(&zone);
+    mp_memory_stream_destroy(&write_ctx);
+    return test_end(test);
+}
+
+bool msgpack_test_nil(test_result_t *test) {
+    mp_stream_t write_stream;
+    mp_memory_stream_ctx_t write_ctx;
+    mp_memory_stream_init_write_dynamic(&write_stream, &write_ctx);
+
+    mp_encode_nil(&write_stream);
+
+    mp_zone_t zone;
+    mp_zone_init(&zone, 4096);
+    mp_object_t obj;
+    mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+
+    if (err != MP_OK) {
+        append_error(test, "Decode failed", err);
+    } else {
+        if (mp_object_as_nil(&obj) != MP_OK) {
+            append_error(test, "Expected NIL type", obj.type);
+        }
+    }
+
+    mp_zone_destroy(&zone);
+    mp_memory_stream_destroy(&write_ctx);
+    return test_end(test);
+}
+
+bool msgpack_test_type_casting(test_result_t *test) {
+    mp_object_t obj;
+    obj.type = MP_TYPE_STR;
+    obj.via.str.size = 5;
+    obj.via.str.ptr = "hello";
+
+    int64_t i_val;
+    if (mp_object_as_int(&obj, &i_val) != MP_ERROR_DECODE_INVALID_FORMAT) {
+        append_error(test, "String cast to Int did not safely fail", 0);
+    }
+
+    bool b_val;
+    if (mp_object_as_bool(&obj, &b_val) != MP_ERROR_DECODE_INVALID_FORMAT) {
+        append_error(test, "String cast to Bool did not safely fail", 0);
+    }
 
     return test_end(test);
 }

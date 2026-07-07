@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../SRC/messagepack.h"
+#include "../include/radikant-messagepack-c.h"
 
 // Recursive AST Equality Checker
 static bool ast_equal(mp_object_t *a, mp_object_t *b) {

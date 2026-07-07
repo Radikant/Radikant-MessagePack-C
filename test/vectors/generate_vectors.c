@@ -186,23 +186,45 @@ void write_raw(const char *path, const char *data, size_t len) {
 #endif
 
 void gen_mallicious() {
-  // Depth bomb: 500 array starts (0x91 = array of size 1)
+  // 1. Depth bomb: 500 array starts (0x91 = array of size 1)
   char bomb[500];
   memset(bomb, 0x91, sizeof(bomb));
-  write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/depth_bomb.bin", bomb,
-            sizeof(bomb));
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/depth_bomb.bin", bomb, sizeof(bomb));
+
+  // 2. OOM Map: Map32 tag (0xdf) requesting 0xFFFFFFFF elements.
+  // A naive parser might try to allocate 4 Billion * sizeof(mp_object_kv_t) = 64GB of RAM instantly.
+  char oom_map[] = {(char)0xdf, (char)0xff, (char)0xff, (char)0xff, (char)0xff};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/oom_map.bin", oom_map, sizeof(oom_map));
+
+  // 3. OOM String: Str32 tag (0xdb) requesting 0xFFFFFFFF bytes, followed by nothing.
+  char oom_str[] = {(char)0xdb, (char)0xff, (char)0xff, (char)0xff, (char)0xff};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/oom_str.bin", oom_str, sizeof(oom_str));
+
+  // 4. OOM Array: Array32 tag (0xdd) requesting 0xFFFFFFFF elements.
+  char oom_array[] = {(char)0xdd, (char)0xff, (char)0xff, (char)0xff, (char)0xff};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/oom_array.bin", oom_array, sizeof(oom_array));
 }
 
 void gen_mallformed() {
-  // Truncated map: 0x8A (map of size 10) but no elements.
-  char trunc[] = {(char)0x8a};
-  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/truncated.bin", trunc,
-            1);
+  // 1. Truncated map: 0x8A (map of size 10) but no elements.
+  char trunc_map[] = {(char)0x8a};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/truncated.bin", trunc_map, sizeof(trunc_map));
 
-  // Invalid tag: 0xc1 (never used)
-  char inv[] = {(char)0xc1};
-  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/invalid_tag.bin", inv,
-            1);
+  // 2. Invalid Tag: 0xC1 is explicitly "Never Used" by the MessagePack specification.
+  char invalid_tag[] = {(char)0xc1};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/invalid_tag.bin", invalid_tag, sizeof(invalid_tag));
+
+  // 3. Truncated UInt32: 0xce expects 4 bytes, but only 2 are provided.
+  char trunc_uint32[] = {(char)0xce, (char)0x12, (char)0x34};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_uint32.bin", trunc_uint32, sizeof(trunc_uint32));
+
+  // 4. Truncated String: 0xd9 (Str8) length 255, but only 4 bytes of actual string data follow.
+  char trunc_str[] = {(char)0xd9, (char)0xff, 'A', 'B', 'C', 'D'};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_str.bin", trunc_str, sizeof(trunc_str));
+
+  // 5. Truncated Extension: 0xd4 (Fixext 1) expects 1 byte of type and 1 byte of data. Missing data.
+  char trunc_ext[] = {(char)0xd4, (char)0x01}; // Type 1, data missing
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_ext.bin", trunc_ext, sizeof(trunc_ext));
 }
 
 int main(void) {

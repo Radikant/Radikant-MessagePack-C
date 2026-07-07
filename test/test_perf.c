@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "../SRC/messagepack.h"
+#include "../include/radikant-messagepack-c.h"
 #include "../reference/cmp.h"
 
 #ifndef PROJECT_ROOT
@@ -90,9 +90,9 @@ void comp_simple_radikant(perf_result_t *res) {
     mp_decoder_init(&decoder, &stream, &zone);
 
     mp_object_t obj;
-    mp_decode(&decoder, &obj);
+    mp_error_t err = mp_decode(&decoder, &obj);
 
-        assert(decoder.error == MP_OK);
+        assert(err == MP_OK);
     assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple || mem_ctx.offset == size_diff);
     mp_zone_destroy(&zone);
     }
@@ -135,9 +135,9 @@ void comp_hard_radikant(perf_result_t *res) {
     mp_decoder_init(&decoder, &stream, &zone);
 
     mp_object_t obj;
-    mp_decode(&decoder, &obj);
+    mp_error_t err = mp_decode(&decoder, &obj);
 
-        assert(decoder.error == MP_OK);
+        assert(err == MP_OK);
     assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple || mem_ctx.offset == size_diff);
     mp_zone_destroy(&zone);
     }
@@ -180,9 +180,9 @@ void comp_diff_radikant(perf_result_t *res) {
     mp_decoder_init(&decoder, &stream, &zone);
 
     mp_object_t obj;
-    mp_decode(&decoder, &obj);
+    mp_error_t err = mp_decode(&decoder, &obj);
 
-        assert(decoder.error == MP_OK);
+        assert(err == MP_OK);
     assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple || mem_ctx.offset == size_diff);
     mp_zone_destroy(&zone);
     }
