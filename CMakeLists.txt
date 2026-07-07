@@ -26,6 +26,10 @@ add_library(Radikant-MessagePack-C SHARED
     SRC/decoder.c
     SRC/types.c
     SRC/skip.c
+    SRC/zone.c
+    SRC/object.c
+    SRC/error.c
+    SRC/stream.c
 )
 
 # ---- Includess ----

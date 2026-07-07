@@ -1,0 +1,416 @@
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode CMP -> Decode Radikant [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode CMP -> Decode Radikant[0m
+  [32mID:         [0m [33m1[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode CMP -> Decode Radikant [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode CMP -> Decode Radikant[0m
+  [32mID:         [0m [33m1[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Simple [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Simple[0m
+  [32mID:         [0m [33m2[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode CMP -> Decode Radikant [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode CMP -> Decode Radikant[0m
+  [32mID:         [0m [33m1[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Simple [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Simple[0m
+  [32mID:         [0m [33m2[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Hard [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Hard[0m
+  [32mID:         [0m [33m3[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode CMP -> Decode Radikant [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode CMP -> Decode Radikant[0m
+  [32mID:         [0m [33m1[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Simple [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Simple[0m
+  [32mID:         [0m [33m2[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Hard [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Hard[0m
+  [32mID:         [0m [33m3[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Difficult [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Difficult[0m
+  [32mID:         [0m [33m4[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode CMP -> Decode Radikant [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode CMP -> Decode Radikant[0m
+  [32mID:         [0m [33m1[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Simple [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Simple[0m
+  [32mID:         [0m [33m2[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Hard [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Hard[0m
+  [32mID:         [0m [33m3[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Difficult [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Difficult[0m
+  [32mID:         [0m [33m4[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Depth Bomb [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Depth Bomb[0m
+  [32mID:         [0m [33m5[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+FAILED test/vectors/attack/mallicious/depth_bomb.bin: Expected error -18, got -10
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode CMP -> Decode Radikant [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode CMP -> Decode Radikant[0m
+  [32mID:         [0m [33m1[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Simple [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Simple[0m
+  [32mID:         [0m [33m2[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Hard [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Hard[0m
+  [32mID:         [0m [33m3[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Difficult [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Difficult[0m
+  [32mID:         [0m [33m4[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Depth Bomb [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Depth Bomb[0m
+  [32mID:         [0m [33m5[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Truncated [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Truncated[0m
+  [32mID:         [0m [33m6[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode CMP -> Decode Radikant [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode CMP -> Decode Radikant[0m
+  [32mID:         [0m [33m1[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Simple [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Simple[0m
+  [32mID:         [0m [33m2[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Hard [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Hard[0m
+  [32mID:         [0m [33m3[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Difficult [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Difficult[0m
+  [32mID:         [0m [33m4[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Depth Bomb [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Depth Bomb[0m
+  [32mID:         [0m [33m5[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Truncated [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Truncated[0m
+  [32mID:         [0m [33m6[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Invalid Tag [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Invalid Tag[0m
+  [32mID:         [0m [33m7[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+
+
+[1m[30m[43m RADIKANT TEST RUNNER | MessagePack Vector Suite | MsgPack-Spec [0m
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode Radikant -> Decode CMP [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode Radikant -> Decode CMP[0m
+  [32mID:         [0m [33m0[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Cross-Validation: Encode CMP -> Decode Radikant [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mCross-Validation: Encode CMP -> Decode Radikant[0m
+  [32mID:         [0m [33m1[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Simple [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Simple[0m
+  [32mID:         [0m [33m2[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Hard [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Hard[0m
+  [32mID:         [0m [33m3[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector: Difficult [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector: Difficult[0m
+  [32mID:         [0m [33m4[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Depth Bomb [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Depth Bomb[0m
+  [32mID:         [0m [33m5[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Truncated [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Truncated[0m
+  [32mID:         [0m [33m6[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m RUNNING TEST: Vector Attack: Invalid Tag [0m
+----------------------------------------------------------------
+  [32mName:       [0m [33mVector Attack: Invalid Tag[0m
+  [32mID:         [0m [33m7[0m
+  [32mGroup:      [0m [33m0[0m
+  [32mStandard:   [0m [33mMsgPack-Spec[0m
+----------------------------------------------------------------
+
+[1m[7m FINAL SUMMARY REPORT | MessagePack Vector Suite | MsgPack-Spec                 [0m
+|------------------------------------------------------------------------------|
+| S | M | Ψ | ID   | Status | Name                           | Standard        |
+|---+---+---+------+--------+--------------------------------+-----------------|
+| [32m✓[0m | [31m✗[0m | [32m✓[0m | 0    | [32mPASS  [0m | Cross-Validation: Encode Radik | MsgPack-Spec    |
+| [32m✓[0m | [31m✗[0m | [32m✓[0m | 1    | [32mPASS  [0m | Cross-Validation: Encode CMP - | MsgPack-Spec    |
+| [32m✓[0m | [31m✗[0m | [32m✓[0m | 2    | [32mPASS  [0m | Vector: Simple                 | MsgPack-Spec    |
+| [32m✓[0m | [31m✗[0m | [32m✓[0m | 3    | [32mPASS  [0m | Vector: Hard                   | MsgPack-Spec    |
+| [32m✓[0m | [31m✗[0m | [32m✓[0m | 4    | [32mPASS  [0m | Vector: Difficult              | MsgPack-Spec    |
+| [31m✗[0m | [31m✗[0m | [32m✓[0m | 5    | [31mFAIL  [0m | Vector Attack: Depth Bomb      | MsgPack-Spec    |
+| [32m✓[0m | [31m✗[0m | [32m✓[0m | 6    | [32mPASS  [0m | Vector Attack: Truncated       | MsgPack-Spec    |
+| [32m✓[0m | [31m✗[0m | [32m✓[0m | 7    | [32mPASS  [0m | Vector Attack: Invalid Tag     | MsgPack-Spec    |
+================================================================================
+ SUMMARY: 8 Tests Run | [32m7 Passed[0m | [31m1 Failed[0m
+================================================================================
+
+
+[1m[7m GLOBAL EXECUTION SUMMARY                                              [0m
+|---------------------------------------------------------------------|
+| Status | Suite Name                               | Standard        |
+|--------+------------------------------------------+-----------------|
+| [31mFAIL  [0m | MessagePack Vector Suite                 | MsgPack-Spec    |
+=======================================================================
+ TOTAL: 1 Suites | [32m0 Passed[0m | [31m1 Failed[0m
+=======================================================================
+
