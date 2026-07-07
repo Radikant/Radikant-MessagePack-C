@@ -19,6 +19,12 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# ---- Sanitizers for Debug Builds ----
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    add_compile_options("-fsanitize=address,undefined" "-fno-omit-frame-pointer" "-g")
+    add_link_options("-fsanitize=address,undefined")
+endif()
+
 # ---- Build shared library ----
 add_library(Radikant-MessagePack-C SHARED
     SRC/messagepack.c

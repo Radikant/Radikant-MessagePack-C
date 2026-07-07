@@ -157,12 +157,8 @@ bool test_vector_file_cmp(test_result_t *test, const char* path, bool expected_s
     cmp_ctx_t cmp;
     cmp_init(&cmp, &mem, cmp_mem_reader, NULL, NULL);
 
-    cmp_object_t obj;
-    bool success = cmp_read_object(&cmp, &obj);
-    if (success) {
-        // Skip recursively to validate full structure
-        success = cmp_skip_object(&cmp, &obj);
-    }
+    // Skip recursively to validate full structure
+    bool success = cmp_skip_object_no_limit(&cmp);
 
     if (success != expected_success) {
         char err_msg[256];

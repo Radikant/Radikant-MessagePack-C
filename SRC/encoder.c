@@ -1,4 +1,5 @@
 #include "encoder.h"
+#include "object.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -162,5 +163,91 @@ mp_error_t mp_encode_map_len(mp_stream_t* stream, uint32_t len) {
         char d[5] = { (char)MP_TAG_MAP32 };
         serialize_be32(d+1, len);
         return mp_encode_bytes(stream, d, sizeof(d));
+    }
+}
+
+mp_error_t mp_encode_ext_len(mp_stream_t* stream, int8_t type, uint32_t len) {
+    if (len == 1) {
+        char d[2] = { (char)MP_TAG_FIXEXT1, type };
+        return mp_encode_bytes(stream, d, 2);
+    } else if (len == 2) {
+        char d[2] = { (char)MP_TAG_FIXEXT2, type };
+        return mp_encode_bytes(stream, d, 2);
+    } else if (len == 4) {
+        char d[2] = { (char)MP_TAG_FIXEXT4, type };
+        return mp_encode_bytes(stream, d, 2);
+    } else if (len == 8) {
+        char d[2] = { (char)MP_TAG_FIXEXT8, type };
+        return mp_encode_bytes(stream, d, 2);
+    } else if (len == 16) {
+        char d[2] = { (char)MP_TAG_FIXEXT16, type };
+        return mp_encode_bytes(stream, d, 2);
+    } else if (len <= 255) {
+        char d[3] = { (char)MP_TAG_EXT8, (char)len, type };
+        return mp_encode_bytes(stream, d, 3);
+    } else if (len <= 65535) {
+        char d[4] = { (char)MP_TAG_EXT16 };
+        serialize_be16(d+1, (uint16_t)len);
+        d[3] = type;
+        return mp_encode_bytes(stream, d, 4);
+    } else {
+        char d[6] = { (char)MP_TAG_EXT32 };
+        serialize_be32(d+1, len);
+        d[5] = type;
+        return mp_encode_bytes(stream, d, 6);
+    }
+}
+
+mp_error_t mp_encode_ext(mp_stream_t* stream, int8_t type, const char* data, uint32_t len) {
+    if (!data && len > 0) return MP_ERROR_ENCODE_NULL_PAYLOAD;
+    mp_error_t err = mp_encode_ext_len(stream, type, len);
+    if (err != MP_OK) return err;
+    if (len > 0) return mp_encode_bytes(stream, data, len);
+    return MP_OK;
+}
+
+mp_error_t mp_encode_object(mp_stream_t* stream, const mp_object_t* obj) {
+    if (!obj) return MP_ERROR_BAD_ARG;
+    switch (obj->type) {
+        case MP_TYPE_NIL:
+            return mp_encode_nil(stream);
+        case MP_TYPE_BOOLEAN:
+            return mp_encode_bool(stream, obj->via.boolean);
+        case MP_TYPE_POSITIVE_INTEGER:
+            return mp_encode_uint(stream, obj->via.u64);
+        case MP_TYPE_NEGATIVE_INTEGER:
+            return mp_encode_int(stream, obj->via.i64);
+        case MP_TYPE_FLOAT32:
+            return mp_encode_float(stream, obj->via.f32);
+        case MP_TYPE_FLOAT64:
+            return mp_encode_double(stream, obj->via.f64);
+        case MP_TYPE_STR:
+            return mp_encode_str(stream, obj->via.str.ptr, obj->via.str.size);
+        case MP_TYPE_BIN:
+            return mp_encode_bin(stream, obj->via.bin.ptr, obj->via.bin.size);
+        case MP_TYPE_ARRAY: {
+            mp_error_t err = mp_encode_array_len(stream, obj->via.array.size);
+            if (err != MP_OK) return err;
+            for (uint32_t i = 0; i < obj->via.array.size; i++) {
+                err = mp_encode_object(stream, &obj->via.array.ptr[i]);
+                if (err != MP_OK) return err;
+            }
+            return MP_OK;
+        }
+        case MP_TYPE_MAP: {
+            mp_error_t err = mp_encode_map_len(stream, obj->via.map.size);
+            if (err != MP_OK) return err;
+            for (uint32_t i = 0; i < obj->via.map.size; i++) {
+                err = mp_encode_object(stream, obj->via.map.ptr[i].key);
+                if (err != MP_OK) return err;
+                err = mp_encode_object(stream, obj->via.map.ptr[i].val);
+                if (err != MP_OK) return err;
+            }
+            return MP_OK;
+        }
+        case MP_TYPE_EXT:
+            return mp_encode_ext(stream, obj->via.ext.type, obj->via.ext.ptr, obj->via.ext.size);
+        default:
+            return MP_ERROR_BAD_ARG;
     }
 }
