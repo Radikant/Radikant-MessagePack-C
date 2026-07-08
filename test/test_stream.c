@@ -63,6 +63,38 @@ bool test_stream_memory_write(test_result_t *test) {
     return test_end(test);
 }
 
+bool test_stream_api_misuse(test_result_t *test) {
+    const char data[] = "hello";
+    mp_stream_t stream;
+    mp_memory_stream_ctx_t ctx;
+    
+    // 1. Initialize for reading
+    mp_stream_init_read(&stream, &ctx, data, 5);
+    
+    // Misuse 1: Passing a NULL buffer to read
+    mp_error_t err = stream.read(&stream, NULL, 5);
+    if (err != MP_ERROR_BAD_ARG) append_error(test, "Expected MP_ERROR_BAD_ARG on NULL buffer", err);
+    
+    // Misuse 2: Trying to write to a read-only stream
+    // WARNING: stream.write is NULL for a read stream. Calling it directly would segfault!
+    // Users must check if the function pointer is non-NULL or rely on higher-level wrappers.
+    if (stream.write != NULL) append_error(test, "Read-only stream should have NULL write function", 0);
+    
+    // 2. Initialize for writing (dynamic)
+    mp_stream_init_write(&stream, &ctx, true, NULL, 0);
+    
+    // Misuse 3: Trying to read from a write-only stream
+    if (stream.read != NULL) append_error(test, "Write-only stream should have NULL read function", 0);
+    
+    // Misuse 4: Write with a NULL buffer but positive count
+    err = stream.write(&stream, NULL, 5);
+    if (err != MP_ERROR_BAD_ARG) append_error(test, "Expected MP_ERROR_BAD_ARG on NULL write buffer", err);
+    
+    mp_memory_stream_destroy(&ctx);
+    
+    return test_end(test);
+}
+
 test_suite_t suite_stream = {.name = "MessagePack Stream Suite", .standard = "MsgPack-Stream"};
 
 int main(void) {
@@ -73,6 +105,7 @@ int main(void) {
     add_test(&suite_stream, test_stream_memory_read_eof, "Stream: Memory Read EOF", "Stream-Spec");
     add_test(&suite_stream, test_stream_memory_skip, "Stream: Memory Skip", "Stream-Spec");
     add_test(&suite_stream, test_stream_memory_write, "Stream: Memory Write", "Stream-Spec");
+    add_test(&suite_stream, test_stream_api_misuse, "Stream: API Misuse", "Stream-Spec");
     
     register_suite(&suite_stream);
     bool success = run_all_suites();
