@@ -73,6 +73,6 @@ endif()
 add_subdirectory_once(lib/Radikant-Probe-C Radikant-Probe-C)
 add_subdirectory_once(lib/mpack mpack)
 
-#enable_testing()
+enable_testing()
 add_subdirectory(test)
 add_subdirectory(example)
