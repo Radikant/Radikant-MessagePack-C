@@ -7,11 +7,11 @@
 #include <time.h>
 
 // Radikant
+#include <mpack.h>
 #include <radikant-messagepack-c.h>
 #include <radikant-probe-c.h>
-#include <mpack.h>
 
-#include "../reference/cmp.h"
+#include <cmp.h>
 
 #ifndef PROJECT_ROOT
 #define PROJECT_ROOT "."
@@ -205,7 +205,6 @@ void comp_diff_radikant(perf_result_t *res) {
   perf_record_speed(res, mb / elapsed);
 }
 
-
 void comp_simple_mpack(perf_result_t *res) {
   clock_t start = clock();
   for (int i = 0; i < ITERS_SIMPLE; i++) {
@@ -253,7 +252,6 @@ void comp_diff_mpack(perf_result_t *res) {
   double mb = (double)(size_diff * ITERS_DIFF) / (1024.0 * 1024.0);
   perf_record_speed(res, mb / elapsed);
 }
-
 
 // --- Encoding Global ASTs ---
 mp_zone_t global_zone;
@@ -313,8 +311,8 @@ static void cmp_encode_mp_object(cmp_ctx_t *cmp, const mp_object_t *obj) {
   }
 }
 
-
-static void mpack_encode_mp_object(mpack_writer_t *writer, const mp_object_t *obj) {
+static void mpack_encode_mp_object(mpack_writer_t *writer,
+                                   const mp_object_t *obj) {
   if (!obj)
     return;
   switch (obj->type) {
@@ -358,7 +356,8 @@ static void mpack_encode_mp_object(mpack_writer_t *writer, const mp_object_t *ob
     mpack_finish_map(writer);
     break;
   case MP_TYPE_EXT:
-    mpack_write_ext(writer, obj->via.ext.type, obj->via.ext.ptr, obj->via.ext.size);
+    mpack_write_ext(writer, obj->via.ext.type, obj->via.ext.ptr,
+                    obj->via.ext.size);
     break;
   }
 }
@@ -643,14 +642,19 @@ int main() {
   perf_suite_t skip_suite;
   init_perf_suite(&skip_suite, "MessagePack Skipping Performance");
 
-  add_perf_test(&skip_suite, false, true, "SIMPLE VECTOR", "cmp", comp_simple_cmp); // CMP decodes by skipping
-  add_perf_test(&skip_suite, true, true, "SIMPLE VECTOR", "radikant", skip_simple_radikant);
+  add_perf_test(&skip_suite, false, true, "SIMPLE VECTOR", "cmp",
+                comp_simple_cmp); // CMP decodes by skipping
+  add_perf_test(&skip_suite, true, true, "SIMPLE VECTOR", "radikant",
+                skip_simple_radikant);
 
   add_perf_test(&skip_suite, false, true, "HARD VECTOR", "cmp", comp_hard_cmp);
-  add_perf_test(&skip_suite, true, true, "HARD VECTOR", "radikant", skip_hard_radikant);
+  add_perf_test(&skip_suite, true, true, "HARD VECTOR", "radikant",
+                skip_hard_radikant);
 
-  add_perf_test(&skip_suite, false, true, "DIFFICULT VECTOR", "cmp", comp_diff_cmp);
-  add_perf_test(&skip_suite, true, true, "DIFFICULT VECTOR", "radikant", skip_diff_radikant);
+  add_perf_test(&skip_suite, false, true, "DIFFICULT VECTOR", "cmp",
+                comp_diff_cmp);
+  add_perf_test(&skip_suite, true, true, "DIFFICULT VECTOR", "radikant",
+                skip_diff_radikant);
 
   run_perf_suite(&skip_suite);
   free_perf_suite(&skip_suite);

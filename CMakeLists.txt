@@ -56,6 +56,7 @@ target_link_libraries(Radikant-MessagePack-C
         Radikant-Socket-C
         Radikant-Probe-C
         Radikant-Log-C
+        mpack
 )
 
 # ---- Output settings ----
@@ -71,7 +72,8 @@ if(NOT PROJECT_IS_TOP_LEVEL)
 endif()
 
 add_subdirectory_once(lib/Radikant-Probe-C Radikant-Probe-C)
-add_subdirectory_once(lib/mpack mpack)
+add_subdirectory_once(cmake/mpack mpack)
+add_subdirectory_once(cmake/cmp cmp)
 
 enable_testing()
 add_subdirectory(test)

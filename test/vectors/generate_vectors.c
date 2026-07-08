@@ -1,4 +1,4 @@
-#include "../../reference/cmp.h"
+#include <cmp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

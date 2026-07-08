@@ -1,5 +1,5 @@
 #include "../include/radikant-messagepack-c.h"
-#include "../reference/cmp.h"
+#include <cmp.h>
 #include "probe.h"
 #include <stdio.h>
 #include <stdlib.h>
