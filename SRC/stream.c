@@ -5,14 +5,14 @@
 static mp_error_t mem_read(mp_stream_t* stream, void* buf, size_t count) {
     if (!stream || !stream->context || !buf) return MP_ERROR_BAD_ARG;
     if (count == 0) return MP_OK;
-    mp_memory_stream_ctx_t* ctx = (mp_memory_stream_ctx_t*)stream->context;
-    if (count > ctx->size - ctx->offset) return MP_ERROR_DECODE_INCOMPLETE;
+    mp_stream_buffer_t* buffer = (mp_stream_buffer_t*)stream->context;
+    if (count > buffer->size - buffer->offset) return MP_ERROR_DECODE_INCOMPLETE;
     
-    memcpy(buf, ctx->data + ctx->offset, count);
-    ctx->offset += count;
+    memcpy(buf, buffer->data + buffer->offset, count);
+    buffer->offset += count;
 
-    stream->fast_ptr = ctx->data + ctx->offset;
-    stream->fast_left = ctx->size - ctx->offset;
+    stream->fast_ptr = buffer->data + buffer->offset;
+    stream->fast_left = buffer->size - buffer->offset;
 
     return MP_OK;
 }
@@ -21,21 +21,21 @@ static mp_error_t mem_write(mp_stream_t* stream, const void* buf, size_t count) 
     if (!stream || !stream->context || (!buf && count > 0)) return MP_ERROR_BAD_ARG;
     if (count == 0) return MP_OK;
 
-    mp_memory_stream_ctx_t* ctx = (mp_memory_stream_ctx_t*)stream->context;
-    if (count > ctx->capacity - ctx->size) {
-        if (!ctx->is_dynamic) return MP_ERROR_ENCODE_BUFFER_OVERFLOW;
-        size_t new_cap = ctx->capacity == 0 ? 4096 : ctx->capacity * 2;
-        while (new_cap - ctx->size < count) new_cap *= 2;
-        char* new_data = (char*)realloc(ctx->data, new_cap);
+    mp_stream_buffer_t* buffer = (mp_stream_buffer_t*)stream->context;
+    if (count > buffer->capacity - buffer->size) {
+        if (!buffer->is_dynamic) return MP_ERROR_ENCODE_BUFFER_OVERFLOW;
+        size_t new_cap = buffer->capacity == 0 ? 4096 : buffer->capacity * 2;
+        while (new_cap - buffer->size < count) new_cap *= 2;
+        char* new_data = (char*)realloc(buffer->data, new_cap);
         if (!new_data) return MP_ERROR_ENCODE_NOMEM;
-        ctx->data = new_data;
-        ctx->capacity = new_cap;
+        buffer->data = new_data;
+        buffer->capacity = new_cap;
     }
-    memcpy(ctx->data + ctx->size, buf, count);
-    ctx->size += count;
+    memcpy(buffer->data + buffer->size, buf, count);
+    buffer->size += count;
 
-    stream->fast_ptr = ctx->data + ctx->size;
-    stream->fast_left = ctx->capacity - ctx->size;
+    stream->fast_ptr = buffer->data + buffer->size;
+    stream->fast_left = buffer->capacity - buffer->size;
 
     return MP_OK;
 }
@@ -43,73 +43,73 @@ static mp_error_t mem_write(mp_stream_t* stream, const void* buf, size_t count) 
 static mp_error_t mem_skip(mp_stream_t* stream, size_t count) {
     if (!stream || !stream->context) return MP_ERROR_BAD_ARG;
     if (count == 0) return MP_OK;
-    mp_memory_stream_ctx_t* ctx = (mp_memory_stream_ctx_t*)stream->context;
-    if (count > ctx->size - ctx->offset) return MP_ERROR_DECODE_INCOMPLETE;
-    ctx->offset += count;
+    mp_stream_buffer_t* buffer = (mp_stream_buffer_t*)stream->context;
+    if (count > buffer->size - buffer->offset) return MP_ERROR_DECODE_INCOMPLETE;
+    buffer->offset += count;
 
-    stream->fast_ptr = ctx->data + ctx->offset;
-    stream->fast_left = ctx->size - ctx->offset;
+    stream->fast_ptr = buffer->data + buffer->offset;
+    stream->fast_left = buffer->size - buffer->offset;
 
     return MP_OK;
 }
 
-void mp_stream_init_read(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, const char* data, size_t size) {
-    if (!stream || !ctx) return;
-    ctx->data = (char*)data; // Cast away const, only read will be used.
-    ctx->size = size;
-    ctx->capacity = size;
-    ctx->offset = 0;
-    ctx->is_dynamic = false;
+void mp_stream_init_read(mp_stream_t* stream, mp_stream_buffer_t* buffer, const char* data, size_t size) {
+    if (!stream || !buffer) return;
+    buffer->data = (char*)data; // Cast away const, only read will be used.
+    buffer->size = size;
+    buffer->capacity = size;
+    buffer->offset = 0;
+    buffer->is_dynamic = false;
     
-    stream->context = ctx;
+    stream->context = buffer;
     stream->read = mem_read;
     stream->write = NULL;
     stream->skip = mem_skip;
 
-    stream->fast_ptr = ctx->data;
+    stream->fast_ptr = buffer->data;
     stream->fast_left = size;
-    stream->fast_size_ptr = &ctx->offset;
+    stream->fast_size_ptr = &buffer->offset;
 }
 
-void mp_stream_init_write(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, bool is_dynamic, char* buf, size_t capacity) {
-    if (!stream || !ctx) return;
+void mp_stream_init_write(mp_stream_t* stream, mp_stream_buffer_t* buffer, bool is_dynamic, char* buf, size_t capacity) {
+    if (!stream || !buffer) return;
     if (is_dynamic) {
-        ctx->data = NULL;
-        ctx->size = 0;
-        ctx->capacity = 0;
-        ctx->offset = 0;
-        ctx->is_dynamic = true;
+        buffer->data = NULL;
+        buffer->size = 0;
+        buffer->capacity = 0;
+        buffer->offset = 0;
+        buffer->is_dynamic = true;
 
         stream->fast_ptr = NULL;
         stream->fast_left = 0;
-        stream->fast_size_ptr = &ctx->size;
+        stream->fast_size_ptr = &buffer->size;
     } else {
-        ctx->data = buf;
-        ctx->size = 0;
-        ctx->capacity = capacity;
-        ctx->offset = 0;
-        ctx->is_dynamic = false;
+        buffer->data = buf;
+        buffer->size = 0;
+        buffer->capacity = capacity;
+        buffer->offset = 0;
+        buffer->is_dynamic = false;
 
         stream->fast_ptr = buf;
         stream->fast_left = capacity;
-        stream->fast_size_ptr = &ctx->size;
+        stream->fast_size_ptr = &buffer->size;
     }
 
-    stream->context = ctx;
+    stream->context = buffer;
     stream->read = NULL;
     stream->write = mem_write;
     stream->skip = NULL;
 }
 
-void mp_memory_stream_destroy(mp_memory_stream_ctx_t* ctx) {
-    if (!ctx) return;
-    if (ctx->is_dynamic && ctx->data) {
-        free(ctx->data);
-        ctx->data = NULL;
+void mp_memory_stream_destroy(mp_stream_buffer_t* buffer) {
+    if (!buffer) return;
+    if (buffer->is_dynamic && buffer->data) {
+        free(buffer->data);
+        buffer->data = NULL;
     }
-    ctx->size = 0;
-    ctx->capacity = 0;
-    ctx->offset = 0;
+    buffer->size = 0;
+    buffer->capacity = 0;
+    buffer->offset = 0;
 }
 
 static mp_error_t file_read(mp_stream_t* stream, void* buf, size_t count) {

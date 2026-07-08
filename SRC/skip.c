@@ -249,8 +249,8 @@ mp_error_t mp_skip_memory(const char *data, size_t size) {
     return MP_ERROR_BAD_ARG;
 
   mp_stream_t stream;
-  mp_memory_stream_ctx_t ctx;
-  mp_stream_init_read(&stream, &ctx, data, size);
+  mp_stream_buffer_t buffer;
+  mp_stream_init_read(&stream, &buffer, data, size);
 
   mp_decoder_t decoder;
   mp_decoder_init(&decoder, &stream, NULL);

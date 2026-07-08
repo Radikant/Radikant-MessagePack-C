@@ -284,16 +284,16 @@ mp_error_t mp_serialize_memory(const mp_object_t *obj, char **out_data,
   if (!obj || !out_data || !out_size)
     return MP_ERROR_BAD_ARG;
 
-  mp_memory_stream_ctx_t ctx;
+  mp_stream_buffer_t buffer;
   mp_stream_t stream;
-  mp_stream_init_write(&stream, &ctx, true, NULL, 0);
+  mp_stream_init_write(&stream, &buffer, true, NULL, 0);
 
   mp_error_t err = mp_encode_object(&stream, obj);
   if (err == MP_OK) {
-    *out_data = ctx.data;
-    *out_size = ctx.size;
+    *out_data = buffer.data;
+    *out_size = buffer.size;
   } else {
-    mp_memory_stream_destroy(&ctx);
+    mp_memory_stream_destroy(&buffer);
     *out_data = NULL;
     *out_size = 0;
   }

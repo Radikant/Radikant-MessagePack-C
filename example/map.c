@@ -4,7 +4,7 @@
 
 #include <radikant-messagepack-c.h>
 
-int encode_example(mp_zone_t *zone, mp_memory_stream_ctx_t *out_ctx) {
+int encode_example(mp_zone_t *zone, mp_stream_buffer_t *out_buffer) {
   // ---------------------------------------------------------
   // 2. Build a MessagePack Object (AST)
   // ---------------------------------------------------------
@@ -26,7 +26,7 @@ int encode_example(mp_zone_t *zone, mp_memory_stream_ctx_t *out_ctx) {
   mp_stream_t enc_stream;
 
   // Using a dynamic stream automatically handles memory reallocation!
-  mp_stream_init_write(&enc_stream, out_ctx, true, NULL, 0);
+  mp_stream_init_write(&enc_stream, out_buffer, true, NULL, 0);
 
   // Perform the encoding
   mp_error_t err = mp_encode_object(&enc_stream, &map);
@@ -36,20 +36,20 @@ int encode_example(mp_zone_t *zone, mp_memory_stream_ctx_t *out_ctx) {
   }
 
   printf("[ENCODE] Successfully serialized to %zu bytes of binary data.\n\n",
-         out_ctx->size);
+         out_buffer->size);
 
   return 0;
 }
 
-int decode_example(mp_zone_t *zone, mp_memory_stream_ctx_t *in_ctx) {
+int decode_example(mp_zone_t *zone, mp_stream_buffer_t *in_buffer) {
   // ---------------------------------------------------------
   // 4. Decode the Binary Data back to an AST
   // ---------------------------------------------------------
-  mp_memory_stream_ctx_t dec_ctx;
+  mp_stream_buffer_t dec_buffer;
   mp_stream_t dec_stream;
 
   // Read from the dynamically allocated buffer
-  mp_stream_init_read(&dec_stream, &dec_ctx, in_ctx->data, in_ctx->size);
+  mp_stream_init_read(&dec_stream, &dec_buffer, in_buffer->data, in_buffer->size);
 
   mp_decoder_t decoder;
   mp_decoder_init(&decoder, &dec_stream, zone);
@@ -93,16 +93,16 @@ int main() {
   mp_zone_t zone;
   mp_zone_init(&zone, 4096);
 
-  mp_memory_stream_ctx_t enc_ctx;
+  mp_stream_buffer_t enc_buffer;
 
-  if (encode_example(&zone, &enc_ctx) != 0) {
+  if (encode_example(&zone, &enc_buffer) != 0) {
     mp_zone_destroy(&zone);
     return 1;
   }
 
-  if (decode_example(&zone, &enc_ctx) != 0) {
+  if (decode_example(&zone, &enc_buffer) != 0) {
     mp_zone_destroy(&zone);
-    mp_memory_stream_destroy(&enc_ctx);
+    mp_memory_stream_destroy(&enc_buffer);
     return 1;
   }
 
@@ -112,7 +112,7 @@ int main() {
   // 6. Cleanup
   // ---------------------------------------------------------
   mp_zone_destroy(&zone);
-  mp_memory_stream_destroy(&enc_ctx);
+  mp_memory_stream_destroy(&enc_buffer);
 
   return 0;
 }

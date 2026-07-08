@@ -32,8 +32,8 @@ bool test_misuse_decoder(test_result_t *test) {
   // mp_decode with NULL object
   // Wait, let's initialize decoder first
   mp_stream_t stream;
-  mp_memory_stream_ctx_t ctx;
-  mp_stream_init_read(&stream, &ctx, "hello", 5);
+  mp_stream_buffer_t buffer;
+  mp_stream_init_read(&stream, &buffer, "hello", 5);
   mp_zone_t zone;
   mp_zone_init(&zone, 1024);
 

@@ -362,8 +362,8 @@ bool test_vector_file_cmp(test_result_t *test, const char *path,
 
 bool test_cross_encode_radikant_decode_cmp(test_result_t *test) {
   mp_stream_t stream;
-  mp_memory_stream_ctx_t ctx;
-  mp_stream_init_write(&stream, &ctx, true, NULL, 0);
+  mp_stream_buffer_t buffer;
+  mp_stream_init_write(&stream, &buffer, true, NULL, 0);
 
   // Encode a complex payload with Radikant
   mp_encode_array_len(&stream, 4);
@@ -373,7 +373,7 @@ bool test_cross_encode_radikant_decode_cmp(test_result_t *test) {
   mp_encode_bool(&stream, true);
 
   // Decode with CMP
-  cmp_mem_t mem = {.buf = ctx.data, .size = ctx.size, .offset = 0};
+  cmp_mem_t mem = {.buf = buffer.data, .size = buffer.size, .offset = 0};
   cmp_ctx_t cmp;
   cmp_init(&cmp, &mem, cmp_mem_reader, NULL, NULL);
 
@@ -404,7 +404,7 @@ bool test_cross_encode_radikant_decode_cmp(test_result_t *test) {
     append_error(test, "CMP bool mismatch", 0);
   }
 
-  mp_memory_stream_destroy(&ctx);
+  mp_memory_stream_destroy(&buffer);
   return test_end(test);
 }
 

@@ -98,9 +98,9 @@ static void test_roundtrip(const char *name, const char *path) {
   // Re-encode it
   // Allocate a large enough buffer for re-encoding
   char *encoded_buf = (char *)malloc(original_size + 1024);
-  mp_memory_stream_ctx_t mem_ctx;
+  mp_stream_buffer_t mem_buffer;
   mp_stream_t stream;
-  mp_stream_init_write(&stream, &mem_ctx, false, encoded_buf,
+  mp_stream_init_write(&stream, &mem_buffer, false, encoded_buf,
                        original_size + 1024);
 
   err = mp_encode_object(&stream, &ast1);
@@ -108,7 +108,7 @@ static void test_roundtrip(const char *name, const char *path) {
 
   // Decode it back
   mp_object_t ast2;
-  err = mp_parse_memory(&zone2, encoded_buf, mem_ctx.size, &ast2);
+  err = mp_parse_memory(&zone2, encoded_buf, mem_buffer.size, &ast2);
   assert(err == MP_OK);
 
   // Check absolute structural equality

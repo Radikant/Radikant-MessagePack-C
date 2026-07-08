@@ -9,9 +9,9 @@ void encode_example(char *buffer, size_t buffer_capacity, size_t *out_size) {
   // ---------------------------------------------------------
   // If you use the Streaming API, you can encode data directly
   // into a buffer without ever allocating an AST or using a Zone.
-  mp_memory_stream_ctx_t enc_ctx;
+  mp_stream_buffer_t enc_buffer;
   mp_stream_t enc_stream;
-  mp_stream_init_write(&enc_stream, &enc_ctx, false, buffer, buffer_capacity);
+  mp_stream_init_write(&enc_stream, &enc_buffer, false, buffer, buffer_capacity);
 
   // Encode an Array: [42, 99, "Hello"]
   mp_encode_array_len(&enc_stream, 3);
@@ -21,8 +21,8 @@ void encode_example(char *buffer, size_t buffer_capacity, size_t *out_size) {
   const char *str = "Hello";
   mp_encode_str(&enc_stream, str, strlen(str));
 
-  *out_size = enc_ctx.size;
-  printf("[ENCODED] Wrote %zu bytes directly to stack buffer.\n", enc_ctx.size);
+  *out_size = enc_buffer.size;
+  printf("[ENCODED] Wrote %zu bytes directly to stack buffer.\n", enc_buffer.size);
 }
 
 void decode_example(const char *buffer, size_t size) {
@@ -36,9 +36,9 @@ void decode_example(const char *buffer, size_t size) {
   mp_zone_t zone;
   mp_zone_init(&zone, 4096);
 
-  mp_memory_stream_ctx_t dec_ctx;
+  mp_stream_buffer_t dec_buffer;
   mp_stream_t dec_stream;
-  mp_stream_init_read(&dec_stream, &dec_ctx, buffer, size);
+  mp_stream_init_read(&dec_stream, &dec_buffer, buffer, size);
 
   mp_decoder_t decoder;
   mp_decoder_init(&decoder, &dec_stream, &zone);

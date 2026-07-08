@@ -40,8 +40,8 @@ int main(void) {
 
 bool msgpack_test_encode_decode(test_result_t *test) {
   mp_stream_t write_stream;
-  mp_memory_stream_ctx_t write_ctx;
-  mp_stream_init_write(&write_stream, &write_ctx, true, NULL, 0);
+  mp_stream_buffer_t write_buffer;
+  mp_stream_init_write(&write_stream, &write_buffer, true, NULL, 0);
 
   // Encode
   mp_encode_array_len(&write_stream, 5);
@@ -56,7 +56,7 @@ bool msgpack_test_encode_decode(test_result_t *test) {
   mp_zone_init(&zone, 4096);
 
   mp_object_t obj;
-  mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+  mp_error_t err = mp_parse_memory(&zone, write_buffer.data, write_buffer.size, &obj);
 
   if (err != MP_OK) {
     append_error(test, "Decode failed with error code", err);
@@ -98,15 +98,15 @@ bool msgpack_test_encode_decode(test_result_t *test) {
   }
 
   mp_zone_destroy(&zone);
-  mp_memory_stream_destroy(&write_ctx);
+  mp_memory_stream_destroy(&write_buffer);
 
   return test_end(test);
 }
 
 bool msgpack_test_bin(test_result_t *test) {
   mp_stream_t write_stream;
-  mp_memory_stream_ctx_t write_ctx;
-  mp_stream_init_write(&write_stream, &write_ctx, true, NULL, 0);
+  mp_stream_buffer_t write_buffer;
+  mp_stream_init_write(&write_stream, &write_buffer, true, NULL, 0);
 
   const char *bin_data = "\x00\x01\x02\xFF";
   mp_encode_bin(&write_stream, bin_data, 4);
@@ -114,7 +114,7 @@ bool msgpack_test_bin(test_result_t *test) {
   mp_zone_t zone;
   mp_zone_init(&zone, 4096);
   mp_object_t obj;
-  mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+  mp_error_t err = mp_parse_memory(&zone, write_buffer.data, write_buffer.size, &obj);
 
   if (err != MP_OK) {
     append_error(test, "Decode failed", err);
@@ -129,14 +129,14 @@ bool msgpack_test_bin(test_result_t *test) {
   }
 
   mp_zone_destroy(&zone);
-  mp_memory_stream_destroy(&write_ctx);
+  mp_memory_stream_destroy(&write_buffer);
   return test_end(test);
 }
 
 bool msgpack_test_ext(test_result_t *test) {
   mp_stream_t write_stream;
-  mp_memory_stream_ctx_t write_ctx;
-  mp_stream_init_write(&write_stream, &write_ctx, true, NULL, 0);
+  mp_stream_buffer_t write_buffer;
+  mp_stream_init_write(&write_stream, &write_buffer, true, NULL, 0);
 
   const char *ext_data = "custom";
   mp_encode_ext(&write_stream, 42, ext_data, 6);
@@ -144,7 +144,7 @@ bool msgpack_test_ext(test_result_t *test) {
   mp_zone_t zone;
   mp_zone_init(&zone, 4096);
   mp_object_t obj;
-  mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+  mp_error_t err = mp_parse_memory(&zone, write_buffer.data, write_buffer.size, &obj);
 
   if (err != MP_OK) {
     append_error(test, "Decode failed", err);
@@ -161,14 +161,14 @@ bool msgpack_test_ext(test_result_t *test) {
   }
 
   mp_zone_destroy(&zone);
-  mp_memory_stream_destroy(&write_ctx);
+  mp_memory_stream_destroy(&write_buffer);
   return test_end(test);
 }
 
 bool msgpack_test_map(test_result_t *test) {
   mp_stream_t write_stream;
-  mp_memory_stream_ctx_t write_ctx;
-  mp_stream_init_write(&write_stream, &write_ctx, true, NULL, 0);
+  mp_stream_buffer_t write_buffer;
+  mp_stream_init_write(&write_stream, &write_buffer, true, NULL, 0);
 
   mp_encode_map_len(&write_stream, 1);
   mp_encode_str(&write_stream, "key", 3);
@@ -177,7 +177,7 @@ bool msgpack_test_map(test_result_t *test) {
   mp_zone_t zone;
   mp_zone_init(&zone, 4096);
   mp_object_t obj;
-  mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+  mp_error_t err = mp_parse_memory(&zone, write_buffer.data, write_buffer.size, &obj);
 
   if (err != MP_OK) {
     append_error(test, "Decode failed", err);
@@ -203,21 +203,21 @@ bool msgpack_test_map(test_result_t *test) {
   }
 
   mp_zone_destroy(&zone);
-  mp_memory_stream_destroy(&write_ctx);
+  mp_memory_stream_destroy(&write_buffer);
   return test_end(test);
 }
 
 bool msgpack_test_nil(test_result_t *test) {
   mp_stream_t write_stream;
-  mp_memory_stream_ctx_t write_ctx;
-  mp_stream_init_write(&write_stream, &write_ctx, true, NULL, 0);
+  mp_stream_buffer_t write_buffer;
+  mp_stream_init_write(&write_stream, &write_buffer, true, NULL, 0);
 
   mp_encode_nil(&write_stream);
 
   mp_zone_t zone;
   mp_zone_init(&zone, 4096);
   mp_object_t obj;
-  mp_error_t err = mp_parse_memory(&zone, write_ctx.data, write_ctx.size, &obj);
+  mp_error_t err = mp_parse_memory(&zone, write_buffer.data, write_buffer.size, &obj);
 
   if (err != MP_OK) {
     append_error(test, "Decode failed", err);
@@ -228,7 +228,7 @@ bool msgpack_test_nil(test_result_t *test) {
   }
 
   mp_zone_destroy(&zone);
-  mp_memory_stream_destroy(&write_ctx);
+  mp_memory_stream_destroy(&write_buffer);
   return test_end(test);
 }
 

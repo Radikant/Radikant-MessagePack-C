@@ -27,7 +27,7 @@ struct mp_stream_s {
     // Fast-path I/O for direct memory access (zero-call buffering)
     char* fast_ptr;
     size_t fast_left;
-    size_t* fast_size_ptr; // Points to ctx->size (for write) or ctx->offset (for read)
+    size_t* fast_size_ptr; // Points to buffer->size (for write) or buffer->offset (for read)
 };
 
 // Memory Stream Context
@@ -37,18 +37,18 @@ typedef struct {
     size_t capacity;
     size_t offset;
     bool is_dynamic;
-} mp_memory_stream_ctx_t;
+} mp_stream_buffer_t;
 
 // Initializes a stream for reading from a fixed memory buffer.
-void mp_stream_init_read(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, const char* data, size_t size);
+void mp_stream_init_read(mp_stream_t* stream, mp_stream_buffer_t* buffer, const char* data, size_t size);
 
 // Initializes a stream for writing.
 // If is_dynamic == true, the stream auto-allocates. buf and capacity are ignored.
 // If is_dynamic == false, the stream writes to the fixed buf.
-void mp_stream_init_write(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, bool is_dynamic, char* buf, size_t capacity);
+void mp_stream_init_write(mp_stream_t* stream, mp_stream_buffer_t* buffer, bool is_dynamic, char* buf, size_t capacity);
 
 // Frees dynamically allocated memory in a dynamic memory stream context.
-void mp_memory_stream_destroy(mp_memory_stream_ctx_t* ctx);
+void mp_memory_stream_destroy(mp_stream_buffer_t* buffer);
 
 // Initializes a stream for reading/writing using standard C FILE* I/O.
 void mp_file_stream_init(mp_stream_t* stream, FILE* file);

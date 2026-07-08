@@ -7,7 +7,7 @@
 // ============================================================================
 // 1. Encoding (Creating a nested MessagePack object)
 // ============================================================================
-int example_encode_nested(mp_zone_t *zone, mp_memory_stream_ctx_t *out_ctx) {
+int example_encode_nested(mp_zone_t *zone, mp_stream_buffer_t *out_buffer) {
   // We want to create the following JSON-like structure:
   // {
   //   "employee": "Charlie",
@@ -61,7 +61,7 @@ int example_encode_nested(mp_zone_t *zone, mp_memory_stream_ctx_t *out_ctx) {
   printf("[ENCODE] Encoding nested employee record...\n");
 
   mp_stream_t enc_stream;
-  mp_stream_init_write(&enc_stream, out_ctx, true, NULL, 0);
+  mp_stream_init_write(&enc_stream, out_buffer, true, NULL, 0);
 
   mp_error_t err = mp_encode_object(&enc_stream, &root_map);
   if (err != MP_OK) {
@@ -70,7 +70,7 @@ int example_encode_nested(mp_zone_t *zone, mp_memory_stream_ctx_t *out_ctx) {
   }
 
   printf("[ENCODE] Successfully serialized to %zu bytes of binary data.\n\n",
-         out_ctx->size);
+         out_buffer->size);
 
   return 0;
 }
@@ -78,11 +78,11 @@ int example_encode_nested(mp_zone_t *zone, mp_memory_stream_ctx_t *out_ctx) {
 // ============================================================================
 // 2. Decoding (Reading a nested MessagePack object)
 // ============================================================================
-int example_decode_nested(mp_zone_t *zone, mp_memory_stream_ctx_t *in_ctx) {
+int example_decode_nested(mp_zone_t *zone, mp_stream_buffer_t *in_buffer) {
   // --- A. Read the binary data back into an AST ---
-  mp_memory_stream_ctx_t dec_ctx;
+  mp_stream_buffer_t dec_buffer;
   mp_stream_t dec_stream;
-  mp_stream_init_read(&dec_stream, &dec_ctx, in_ctx->data, in_ctx->size);
+  mp_stream_init_read(&dec_stream, &dec_buffer, in_buffer->data, in_buffer->size);
 
   mp_decoder_t decoder;
   mp_decoder_init(&decoder, &dec_stream, zone);
@@ -141,18 +141,18 @@ int main() {
   mp_zone_t zone;
   mp_zone_init(&zone, 4096);
 
-  mp_memory_stream_ctx_t enc_ctx;
+  mp_stream_buffer_t enc_buffer;
 
   // 2. Encode
-  if (example_encode_nested(&zone, &enc_ctx) != 0) {
+  if (example_encode_nested(&zone, &enc_buffer) != 0) {
     mp_zone_destroy(&zone);
     return 1;
   }
 
   // 3. Decode
-  if (example_decode_nested(&zone, &enc_ctx) != 0) {
+  if (example_decode_nested(&zone, &enc_buffer) != 0) {
     mp_zone_destroy(&zone);
-    mp_memory_stream_destroy(&enc_ctx);
+    mp_memory_stream_destroy(&enc_buffer);
     return 1;
   }
 
@@ -160,7 +160,7 @@ int main() {
 
   // 4. Cleanup
   mp_zone_destroy(&zone);
-  mp_memory_stream_destroy(&enc_ctx);
+  mp_memory_stream_destroy(&enc_buffer);
 
   return 0;
 }

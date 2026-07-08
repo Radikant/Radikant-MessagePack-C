@@ -5,8 +5,8 @@
 
 bool msgpack_test_sax_decode(test_result_t *test) {
     mp_stream_t write_stream;
-    mp_memory_stream_ctx_t write_ctx;
-    mp_stream_init_write(&write_stream, &write_ctx, true, NULL, 0);
+    mp_stream_buffer_t write_buffer;
+    mp_stream_init_write(&write_stream, &write_buffer, true, NULL, 0);
 
     // Encode a sequence: INT, FLOAT, STR
     mp_encode_int(&write_stream, 42);
@@ -15,8 +15,8 @@ bool msgpack_test_sax_decode(test_result_t *test) {
 
     // Prepare read stream
     mp_stream_t read_stream;
-    mp_memory_stream_ctx_t read_ctx;
-    mp_stream_init_read(&read_stream, &read_ctx, write_ctx.data, write_ctx.size);
+    mp_stream_buffer_t read_buffer;
+    mp_stream_init_read(&read_stream, &read_buffer, write_buffer.data, write_buffer.size);
 
     int64_t i_val;
     if (mp_decode_stream_int(&read_stream, &i_val) != MP_OK || i_val != 42) {
@@ -38,7 +38,7 @@ bool msgpack_test_sax_decode(test_result_t *test) {
         append_error(test, "SAX read STR body failed", 0);
     }
 
-    mp_memory_stream_destroy(&write_ctx);
+    mp_memory_stream_destroy(&write_buffer);
     return test_end(test);
 }
 
