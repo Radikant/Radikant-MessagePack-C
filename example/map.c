@@ -87,12 +87,8 @@ int main() {
   printf(" Radikant MessagePack-C Example\n");
   printf("======================================\n\n");
 
-  // ---------------------------------------------------------
-  // 1. Initialize an Allocator (Zone)
-  // ---------------------------------------------------------
   mp_zone_t zone;
   mp_zone_init(&zone, 4096);
-
   mp_stream_buffer_t enc_buffer;
 
   if (encode_example(&zone, &enc_buffer) != 0) {
@@ -108,9 +104,6 @@ int main() {
 
   printf("\n======================================\n");
 
-  // ---------------------------------------------------------
-  // 6. Cleanup
-  // ---------------------------------------------------------
   mp_zone_destroy(&zone);
   mp_memory_stream_destroy(&enc_buffer);
 

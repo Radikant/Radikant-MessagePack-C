@@ -66,8 +66,7 @@ int decode_builder_example(mp_zone_t *zone, const char *data, size_t size) {
 
     printf("[BUILDER DECODE] Index 0 (Double): %.1f\n", val_double);
     printf("[BUILDER DECODE] Index 1 (Int)   : %lld\n", (long long)val_int64);
-    printf("[BUILDER DECODE] Index 2 (String): %.*s\n", (int)val_char_len,
-           val_char);
+    printf("[BUILDER DECODE] Index 2 (String): %.*s\n", (int)val_char_len,val_char);
     printf("[BUILDER DECODE] Index 3 (Bool)  : %s\n", val_bool ? "true" : "false");
   }
   printf("\n");
