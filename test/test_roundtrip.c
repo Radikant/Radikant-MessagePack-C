@@ -5,11 +5,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../include/radikant-messagepack-c.h"
+// Radikant
+#include <radikant-messagepack-c.h>
+#include <radikant-probe-c.h>
 
 // Recursive AST Equality Checker
 static bool ast_equal(mp_object_t *a, mp_object_t *b) {
-  if (a->type != b->type) return false;
+  if (a->type != b->type)
+    return false;
 
   switch (a->type) {
   case MP_TYPE_NIL:
@@ -25,26 +28,35 @@ static bool ast_equal(mp_object_t *a, mp_object_t *b) {
   case MP_TYPE_FLOAT64:
     return a->via.f64 == b->via.f64;
   case MP_TYPE_STR:
-    if (a->via.str.size != b->via.str.size) return false;
+    if (a->via.str.size != b->via.str.size)
+      return false;
     return memcmp(a->via.str.ptr, b->via.str.ptr, a->via.str.size) == 0;
   case MP_TYPE_BIN:
-    if (a->via.bin.size != b->via.bin.size) return false;
+    if (a->via.bin.size != b->via.bin.size)
+      return false;
     return memcmp(a->via.bin.ptr, b->via.bin.ptr, a->via.bin.size) == 0;
   case MP_TYPE_EXT:
-    if (a->via.ext.type != b->via.ext.type) return false;
-    if (a->via.ext.size != b->via.ext.size) return false;
+    if (a->via.ext.type != b->via.ext.type)
+      return false;
+    if (a->via.ext.size != b->via.ext.size)
+      return false;
     return memcmp(a->via.ext.ptr, b->via.ext.ptr, a->via.ext.size) == 0;
   case MP_TYPE_ARRAY:
-    if (a->via.array.size != b->via.array.size) return false;
+    if (a->via.array.size != b->via.array.size)
+      return false;
     for (uint32_t i = 0; i < a->via.array.size; i++) {
-      if (!ast_equal(&a->via.array.ptr[i], &b->via.array.ptr[i])) return false;
+      if (!ast_equal(&a->via.array.ptr[i], &b->via.array.ptr[i]))
+        return false;
     }
     return true;
   case MP_TYPE_MAP:
-    if (a->via.map.size != b->via.map.size) return false;
+    if (a->via.map.size != b->via.map.size)
+      return false;
     for (uint32_t i = 0; i < a->via.map.size; i++) {
-      if (!ast_equal(a->via.map.ptr[i].key, b->via.map.ptr[i].key)) return false;
-      if (!ast_equal(a->via.map.ptr[i].val, b->via.map.ptr[i].val)) return false;
+      if (!ast_equal(&a->via.map.ptr[i].key, &b->via.map.ptr[i].key))
+        return false;
+      if (!ast_equal(&a->via.map.ptr[i].val, &b->via.map.ptr[i].val))
+        return false;
     }
     return true;
   }
@@ -57,12 +69,14 @@ static bool ast_equal(mp_object_t *a, mp_object_t *b) {
 
 static char *read_file_to_mem(const char *path, size_t *out_size) {
   FILE *f = fopen(path, "rb");
-  if (!f) return NULL;
+  if (!f)
+    return NULL;
   fseek(f, 0, SEEK_END);
   *out_size = ftell(f);
   fseek(f, 0, SEEK_SET);
   char *buf = (char *)malloc(*out_size);
-  if (buf) fread(buf, 1, *out_size, f);
+  if (buf)
+    fread(buf, 1, *out_size, f);
   fclose(f);
   return buf;
 }
@@ -86,8 +100,9 @@ static void test_roundtrip(const char *name, const char *path) {
   char *encoded_buf = (char *)malloc(original_size + 1024);
   mp_memory_stream_ctx_t mem_ctx;
   mp_stream_t stream;
-  mp_memory_stream_init_write_fixed(&stream, &mem_ctx, encoded_buf, original_size + 1024);
-  
+  mp_stream_init_write(&stream, &mem_ctx, false, encoded_buf,
+                       original_size + 1024);
+
   err = mp_encode_object(&stream, &ast1);
   assert(err == MP_OK);
 
@@ -111,10 +126,13 @@ static void test_roundtrip(const char *name, const char *path) {
 }
 
 int main() {
-  test_roundtrip("Simple Vector", PROJECT_ROOT "/test/vectors/test/simple/simple1.bin");
-  test_roundtrip("Hard Vector", PROJECT_ROOT "/test/vectors/test/hard/hard1.bin");
-  test_roundtrip("Difficult Vector", PROJECT_ROOT "/test/vectors/test/difficult/diff1.bin");
-  
+  test_roundtrip("Simple Vector",
+                 PROJECT_ROOT "/test/vectors/test/simple/simple1.bin");
+  test_roundtrip("Hard Vector",
+                 PROJECT_ROOT "/test/vectors/test/hard/hard1.bin");
+  test_roundtrip("Difficult Vector",
+                 PROJECT_ROOT "/test/vectors/test/difficult/diff1.bin");
+
   printf("All round-trip fidelity tests completed successfully.\n");
   return 0;
 }

@@ -201,7 +201,7 @@ bool test_vector_file_cmp(test_result_t *test, const char* path, bool expected_s
 bool test_cross_encode_radikant_decode_cmp(test_result_t *test) {
     mp_stream_t stream;
     mp_memory_stream_ctx_t ctx;
-    mp_memory_stream_init_write_dynamic(&stream, &ctx);
+    mp_stream_init_write(&stream, &ctx, true, NULL, 0);
 
     // Encode a complex payload with Radikant
     mp_encode_array_len(&stream, 4);
@@ -276,15 +276,15 @@ bool test_cross_encode_cmp_decode_radikant(test_result_t *test) {
         } else {
             const char* k1; uint32_t l1;
             int64_t v1;
-            mp_object_as_str(map_elements[0].key, &k1, &l1);
-            mp_object_as_int(map_elements[0].val, &v1);
+            mp_object_as_str(&map_elements[0].key, &k1, &l1);
+            mp_object_as_int(&map_elements[0].val, &v1);
             if (strncmp(k1, "key1", 4) != 0 || v1 != 987654321) {
                 append_error(test, "Radikant map pair 1 mismatch", 0);
             }
 
             const char* k2; uint32_t l2;
-            mp_object_as_str(map_elements[1].key, &k2, &l2);
-            if (strncmp(k2, "key2", 4) != 0 || mp_object_as_nil(map_elements[1].val) != MP_OK) {
+            mp_object_as_str(&map_elements[1].key, &k2, &l2);
+            if (strncmp(k2, "key2", 4) != 0 || mp_object_as_nil(&map_elements[1].val) != MP_OK) {
                 append_error(test, "Radikant map pair 2 mismatch", 0);
             }
         }

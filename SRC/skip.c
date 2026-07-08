@@ -59,9 +59,10 @@ mp_error_t mp_skip(mp_decoder_t* decoder) {
         return MP_OK;
     } else if (b >= MP_TAG_FIXMAP_MIN && b <= MP_TAG_FIXMAP_MAX) {
         uint32_t len = b & 0x0f;
-        for (uint32_t i = 0; i < len * 2; ++i) {
+        for (uint32_t i = 0; i < len; ++i) {
             decoder->depth++;
             err = mp_skip(decoder);
+            if (err == MP_OK) err = mp_skip(decoder);
             decoder->depth--;
             if (err != MP_OK) return err;
         }
@@ -141,9 +142,10 @@ mp_error_t mp_skip(mp_decoder_t* decoder) {
             err = stream_read(decoder, buf, 2);
             if (err != MP_OK) return MP_ERROR_DECODE_INCOMPLETE;
             uint32_t len = deserialize_be16(buf);
-            for (uint32_t i = 0; i < len * 2; ++i) {
+            for (uint32_t i = 0; i < len; ++i) {
                 decoder->depth++;
                 err = mp_skip(decoder);
+                if (err == MP_OK) err = mp_skip(decoder);
                 decoder->depth--;
                 if (err != MP_OK) return err;
             }
@@ -154,9 +156,10 @@ mp_error_t mp_skip(mp_decoder_t* decoder) {
             err = stream_read(decoder, buf, 4);
             if (err != MP_OK) return MP_ERROR_DECODE_INCOMPLETE;
             uint32_t len = deserialize_be32(buf);
-            for (uint32_t i = 0; i < len * 2; ++i) {
+            for (uint32_t i = 0; i < len; ++i) {
                 decoder->depth++;
                 err = mp_skip(decoder);
+                if (err == MP_OK) err = mp_skip(decoder);
                 decoder->depth--;
                 if (err != MP_OK) return err;
             }
@@ -198,7 +201,7 @@ mp_error_t mp_skip_memory(const char* data, size_t size) {
 
     mp_stream_t stream;
     mp_memory_stream_ctx_t ctx;
-    mp_memory_stream_init_read(&stream, &ctx, data, size);
+    mp_stream_init_read(&stream, &ctx, data, size);
 
     mp_decoder_t decoder;
     mp_decoder_init(&decoder, &stream, NULL);

@@ -238,9 +238,9 @@ mp_error_t mp_encode_object(mp_stream_t* stream, const mp_object_t* obj) {
             mp_error_t err = mp_encode_map_len(stream, obj->via.map.size);
             if (err != MP_OK) return err;
             for (uint32_t i = 0; i < obj->via.map.size; i++) {
-                err = mp_encode_object(stream, obj->via.map.ptr[i].key);
+                err = mp_encode_object(stream, &obj->via.map.ptr[i].key);
                 if (err != MP_OK) return err;
-                err = mp_encode_object(stream, obj->via.map.ptr[i].val);
+                err = mp_encode_object(stream, &obj->via.map.ptr[i].val);
                 if (err != MP_OK) return err;
             }
             return MP_OK;
@@ -248,6 +248,25 @@ mp_error_t mp_encode_object(mp_stream_t* stream, const mp_object_t* obj) {
         case MP_TYPE_EXT:
             return mp_encode_ext(stream, obj->via.ext.type, obj->via.ext.ptr, obj->via.ext.size);
         default:
-            return MP_ERROR_BAD_ARG;
+            return MP_ERROR_ENCODE_UNSUPPORTED_TYPE;
     }
+}
+
+mp_error_t mp_serialize_memory(const mp_object_t* obj, char** out_data, size_t* out_size) {
+    if (!obj || !out_data || !out_size) return MP_ERROR_BAD_ARG;
+    
+    mp_memory_stream_ctx_t ctx;
+    mp_stream_t stream;
+    mp_stream_init_write(&stream, &ctx, true, NULL, 0);
+
+    mp_error_t err = mp_encode_object(&stream, obj);
+    if (err == MP_OK) {
+        *out_data = ctx.data;
+        *out_size = ctx.size;
+    } else {
+        mp_memory_stream_destroy(&ctx);
+        *out_data = NULL;
+        *out_size = 0;
+    }
+    return err;
 }

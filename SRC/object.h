@@ -16,10 +16,7 @@ typedef struct {
     mp_object_t* ptr;
 } mp_object_array_t;
 
-typedef struct {
-    mp_object_t* key;
-    mp_object_t* val;
-} mp_object_kv_t;
+typedef struct mp_object_kv_t mp_object_kv_t;
 
 typedef struct {
     uint32_t size;
@@ -58,6 +55,11 @@ union mp_object_union_t {
 struct mp_object_t {
     mp_type_t type;
     union mp_object_union_t via;
+};
+
+struct mp_object_kv_t {
+    mp_object_t key;
+    mp_object_t val;
 };
 
 // Safe Accessors

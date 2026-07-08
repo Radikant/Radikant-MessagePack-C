@@ -10,17 +10,17 @@ extern "C" {
 #endif
 
 typedef enum {
-    MP_TYPE_NIL = 0,
-    MP_TYPE_BOOLEAN,
-    MP_TYPE_POSITIVE_INTEGER,
-    MP_TYPE_NEGATIVE_INTEGER,
-    MP_TYPE_FLOAT32,
-    MP_TYPE_FLOAT64,
-    MP_TYPE_STR,
-    MP_TYPE_BIN,
-    MP_TYPE_ARRAY,
-    MP_TYPE_MAP,
-    MP_TYPE_EXT
+    MP_TYPE_NIL = 0,           // Null/empty value
+    MP_TYPE_BOOLEAN,           // True or false
+    MP_TYPE_POSITIVE_INTEGER,  // Unsigned 64-bit integer
+    MP_TYPE_NEGATIVE_INTEGER,  // Signed 64-bit integer
+    MP_TYPE_FLOAT32,           // 32-bit floating point
+    MP_TYPE_FLOAT64,           // 64-bit floating point
+    MP_TYPE_STR,               // UTF-8 string
+    MP_TYPE_BIN,               // Raw binary data
+    MP_TYPE_ARRAY,             // Ordered list of objects
+    MP_TYPE_MAP,               // Key-value pairs
+    MP_TYPE_EXT                // Custom application-specific types
 } mp_type_t;
 
 typedef enum {

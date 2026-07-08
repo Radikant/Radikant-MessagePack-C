@@ -106,6 +106,8 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     return read_string_to_zone(decoder, out_obj, b & 0x1f);
   } else if (b >= MP_TAG_FIXARRAY_MIN && b <= MP_TAG_FIXARRAY_MAX) {
     uint32_t len = b & 0x0f;
+    if ((size_t)len > ((size_t)-1) / sizeof(mp_object_t))
+      return MP_ERROR_NOMEM;
     out_obj->type = MP_TYPE_ARRAY;
     out_obj->via.array.size = len;
     out_obj->via.array.ptr =
@@ -124,6 +126,8 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     return MP_OK;
   } else if (b >= MP_TAG_FIXMAP_MIN && b <= MP_TAG_FIXMAP_MAX) {
     uint32_t len = b & 0x0f;
+    if ((size_t)len > ((size_t)-1) / sizeof(mp_object_kv_t))
+      return MP_ERROR_NOMEM;
     out_obj->type = MP_TYPE_MAP;
     out_obj->via.map.size = len;
     out_obj->via.map.ptr =
@@ -133,17 +137,10 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     if (!out_obj->via.map.ptr && len > 0)
       return MP_ERROR_NOMEM;
     for (uint32_t i = 0; i < len; ++i) {
-      out_obj->via.map.ptr[i].key =
-          (mp_object_t *)mp_zone_alloc(decoder->zone, sizeof(mp_object_t));
-      out_obj->via.map.ptr[i].val =
-          (mp_object_t *)mp_zone_alloc(decoder->zone, sizeof(mp_object_t));
-      if (!out_obj->via.map.ptr[i].key || !out_obj->via.map.ptr[i].val)
-        return MP_ERROR_NOMEM;
-
       decoder->depth++;
-      err = mp_decode_internal(decoder, out_obj->via.map.ptr[i].key);
+      err = mp_decode_internal(decoder, &out_obj->via.map.ptr[i].key);
       if (err == MP_OK)
-        err = mp_decode_internal(decoder, out_obj->via.map.ptr[i].val);
+        err = mp_decode_internal(decoder, &out_obj->via.map.ptr[i].val);
       decoder->depth--;
       if (err != MP_OK)
         return err;
@@ -294,6 +291,8 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     if (read_bytes(decoder, buf, 2) != MP_OK)
       return MP_ERROR_DECODE_TRUNCATED_ARRAY;
     uint32_t len = deserialize_be16(buf);
+    if ((size_t)len > ((size_t)-1) / sizeof(mp_object_t))
+      return MP_ERROR_NOMEM;
     out_obj->type = MP_TYPE_ARRAY;
     out_obj->via.array.size = len;
     out_obj->via.array.ptr =
@@ -316,6 +315,8 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     if (read_bytes(decoder, buf, 4) != MP_OK)
       return MP_ERROR_DECODE_TRUNCATED_ARRAY;
     uint32_t len = deserialize_be32(buf);
+    if ((size_t)len > ((size_t)-1) / sizeof(mp_object_t))
+      return MP_ERROR_NOMEM;
     out_obj->type = MP_TYPE_ARRAY;
     out_obj->via.array.size = len;
     out_obj->via.array.ptr =
@@ -338,6 +339,8 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     if (read_bytes(decoder, buf, 2) != MP_OK)
       return MP_ERROR_DECODE_TRUNCATED_MAP;
     uint32_t len = deserialize_be16(buf);
+    if ((size_t)len > ((size_t)-1) / sizeof(mp_object_kv_t))
+      return MP_ERROR_NOMEM;
     out_obj->type = MP_TYPE_MAP;
     out_obj->via.map.size = len;
     out_obj->via.map.ptr =
@@ -347,16 +350,10 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     if (!out_obj->via.map.ptr && len > 0)
       return MP_ERROR_NOMEM;
     for (uint32_t i = 0; i < len; ++i) {
-      out_obj->via.map.ptr[i].key =
-          (mp_object_t *)mp_zone_alloc(decoder->zone, sizeof(mp_object_t));
-      out_obj->via.map.ptr[i].val =
-          (mp_object_t *)mp_zone_alloc(decoder->zone, sizeof(mp_object_t));
-      if (!out_obj->via.map.ptr[i].key || !out_obj->via.map.ptr[i].val)
-        return MP_ERROR_NOMEM;
       decoder->depth++;
-      err = mp_decode_internal(decoder, out_obj->via.map.ptr[i].key);
+      err = mp_decode_internal(decoder, &out_obj->via.map.ptr[i].key);
       if (err == MP_OK)
-        err = mp_decode_internal(decoder, out_obj->via.map.ptr[i].val);
+        err = mp_decode_internal(decoder, &out_obj->via.map.ptr[i].val);
       decoder->depth--;
       if (err != MP_OK)
         return err;
@@ -368,6 +365,8 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     if (read_bytes(decoder, buf, 4) != MP_OK)
       return MP_ERROR_DECODE_TRUNCATED_MAP;
     uint32_t len = deserialize_be32(buf);
+    if ((size_t)len > ((size_t)-1) / sizeof(mp_object_kv_t))
+      return MP_ERROR_NOMEM;
     out_obj->type = MP_TYPE_MAP;
     out_obj->via.map.size = len;
     out_obj->via.map.ptr =
@@ -377,16 +376,10 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     if (!out_obj->via.map.ptr && len > 0)
       return MP_ERROR_NOMEM;
     for (uint32_t i = 0; i < len; ++i) {
-      out_obj->via.map.ptr[i].key =
-          (mp_object_t *)mp_zone_alloc(decoder->zone, sizeof(mp_object_t));
-      out_obj->via.map.ptr[i].val =
-          (mp_object_t *)mp_zone_alloc(decoder->zone, sizeof(mp_object_t));
-      if (!out_obj->via.map.ptr[i].key || !out_obj->via.map.ptr[i].val)
-        return MP_ERROR_NOMEM;
       decoder->depth++;
-      err = mp_decode_internal(decoder, out_obj->via.map.ptr[i].key);
+      err = mp_decode_internal(decoder, &out_obj->via.map.ptr[i].key);
       if (err == MP_OK)
-        err = mp_decode_internal(decoder, out_obj->via.map.ptr[i].val);
+        err = mp_decode_internal(decoder, &out_obj->via.map.ptr[i].val);
       decoder->depth--;
       if (err != MP_OK)
         return err;
@@ -399,16 +392,6 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
   case MP_TAG_FIXEXT8:
   case MP_TAG_FIXEXT16: {
     uint32_t len = 1 << (b - MP_TAG_FIXEXT1);
-    if (b == MP_TAG_FIXEXT1)
-      len = 1;
-    else if (b == MP_TAG_FIXEXT2)
-      len = 2;
-    else if (b == MP_TAG_FIXEXT4)
-      len = 4;
-    else if (b == MP_TAG_FIXEXT8)
-      len = 8;
-    else if (b == MP_TAG_FIXEXT16)
-      len = 16;
     return read_ext_to_zone(decoder, out_obj, len);
   }
   case MP_TAG_EXT8: {
@@ -442,7 +425,7 @@ mp_error_t mp_parse_memory(mp_zone_t *zone, const char *data, size_t size,
 
   mp_stream_t stream;
   mp_memory_stream_ctx_t ctx;
-  mp_memory_stream_init_read(&stream, &ctx, data, size);
+  mp_stream_init_read(&stream, &ctx, data, size);
 
   mp_decoder_t decoder;
   mp_decoder_init(&decoder, &stream, zone);

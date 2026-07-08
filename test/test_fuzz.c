@@ -1,13 +1,13 @@
 #include <assert.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include "../include/radikant-messagepack-c.h"
-#include "probe.h"
+// Radikant
+#include <radikant-messagepack-c.h>
+#include <radikant-probe-c.h>
 
 #ifndef PROJECT_ROOT
 #define PROJECT_ROOT "."

@@ -1,13 +1,15 @@
-#include "../lib/Radikant-Probe-C/SRC/perf.h"
+// Std
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <assert.h>
-#include <stdlib.h>
 
-#include "../include/radikant-messagepack-c.h"
+// Radikant
+#include <radikant-messagepack-c.h>
+#include <radikant-probe-c.h>
+
 #include "../reference/cmp.h"
 
 #ifndef PROJECT_ROOT
@@ -67,8 +69,9 @@ void comp_simple_cmp(perf_result_t *res) {
     cmp_ctx_t cmp;
     cmp_init(&cmp, &mem, cmp_mem_reader, NULL, NULL);
     cmp_skip_object_no_limit(&cmp);
-      assert(cmp.error == 0);
-    assert(mem.offset == size_hard || mem.offset == size_simple || mem.offset == size_diff);
+    assert(cmp.error == 0);
+    assert(mem.offset == size_hard || mem.offset == size_simple ||
+           mem.offset == size_diff);
   }
   clock_t end = clock();
   double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
@@ -84,7 +87,7 @@ void comp_simple_radikant(perf_result_t *res) {
 
     mp_memory_stream_ctx_t mem_ctx;
     mp_stream_t stream;
-    mp_memory_stream_init_read(&stream, &mem_ctx, buf_simple, size_simple);
+    mp_stream_init_read(&stream, &mem_ctx, buf_simple, size_simple);
 
     mp_decoder_t decoder;
     mp_decoder_init(&decoder, &stream, &zone);
@@ -92,10 +95,11 @@ void comp_simple_radikant(perf_result_t *res) {
     mp_object_t obj;
     mp_error_t err = mp_decode(&decoder, &obj);
 
-        assert(err == MP_OK);
-    assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple || mem_ctx.offset == size_diff);
+    assert(err == MP_OK);
+    assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple ||
+           mem_ctx.offset == size_diff);
     mp_zone_destroy(&zone);
-    }
+  }
   clock_t end = clock();
 
   double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
@@ -112,8 +116,9 @@ void comp_hard_cmp(perf_result_t *res) {
     cmp_ctx_t cmp;
     cmp_init(&cmp, &mem, cmp_mem_reader, NULL, NULL);
     cmp_skip_object_no_limit(&cmp);
-      assert(cmp.error == 0);
-    assert(mem.offset == size_hard || mem.offset == size_simple || mem.offset == size_diff);
+    assert(cmp.error == 0);
+    assert(mem.offset == size_hard || mem.offset == size_simple ||
+           mem.offset == size_diff);
   }
   clock_t end = clock();
   double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
@@ -129,7 +134,7 @@ void comp_hard_radikant(perf_result_t *res) {
 
     mp_memory_stream_ctx_t mem_ctx;
     mp_stream_t stream;
-    mp_memory_stream_init_read(&stream, &mem_ctx, buf_hard, size_hard);
+    mp_stream_init_read(&stream, &mem_ctx, buf_hard, size_hard);
 
     mp_decoder_t decoder;
     mp_decoder_init(&decoder, &stream, &zone);
@@ -137,10 +142,11 @@ void comp_hard_radikant(perf_result_t *res) {
     mp_object_t obj;
     mp_error_t err = mp_decode(&decoder, &obj);
 
-        assert(err == MP_OK);
-    assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple || mem_ctx.offset == size_diff);
+    assert(err == MP_OK);
+    assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple ||
+           mem_ctx.offset == size_diff);
     mp_zone_destroy(&zone);
-    }
+  }
   clock_t end = clock();
 
   double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
@@ -157,8 +163,9 @@ void comp_diff_cmp(perf_result_t *res) {
     cmp_ctx_t cmp;
     cmp_init(&cmp, &mem, cmp_mem_reader, NULL, NULL);
     cmp_skip_object_no_limit(&cmp);
-      assert(cmp.error == 0);
-    assert(mem.offset == size_hard || mem.offset == size_simple || mem.offset == size_diff);
+    assert(cmp.error == 0);
+    assert(mem.offset == size_hard || mem.offset == size_simple ||
+           mem.offset == size_diff);
   }
   clock_t end = clock();
   double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
@@ -174,7 +181,7 @@ void comp_diff_radikant(perf_result_t *res) {
 
     mp_memory_stream_ctx_t mem_ctx;
     mp_stream_t stream;
-    mp_memory_stream_init_read(&stream, &mem_ctx, buf_diff, size_diff);
+    mp_stream_init_read(&stream, &mem_ctx, buf_diff, size_diff);
 
     mp_decoder_t decoder;
     mp_decoder_init(&decoder, &stream, &zone);
@@ -182,10 +189,11 @@ void comp_diff_radikant(perf_result_t *res) {
     mp_object_t obj;
     mp_error_t err = mp_decode(&decoder, &obj);
 
-        assert(err == MP_OK);
-    assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple || mem_ctx.offset == size_diff);
+    assert(err == MP_OK);
+    assert(mem_ctx.offset == size_hard || mem_ctx.offset == size_simple ||
+           mem_ctx.offset == size_diff);
     mp_zone_destroy(&zone);
-    }
+  }
   clock_t end = clock();
 
   double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
@@ -241,8 +249,8 @@ static void cmp_encode_mp_object(cmp_ctx_t *cmp, const mp_object_t *obj) {
   case MP_TYPE_MAP:
     cmp_write_map(cmp, obj->via.map.size);
     for (uint32_t i = 0; i < obj->via.map.size; i++) {
-      cmp_encode_mp_object(cmp, obj->via.map.ptr[i].key);
-      cmp_encode_mp_object(cmp, obj->via.map.ptr[i].val);
+      cmp_encode_mp_object(cmp, &obj->via.map.ptr[i].key);
+      cmp_encode_mp_object(cmp, &obj->via.map.ptr[i].val);
     }
     break;
   case MP_TYPE_EXT:
@@ -270,7 +278,7 @@ void enc_simple_cmp(perf_result_t *res) {
     cmp_ctx_t cmp;
     cmp_init(&cmp, &mem, NULL, NULL, cmp_mem_writer);
     cmp_encode_mp_object(&cmp, &ast_simple);
-      assert(cmp.error == 0);
+    assert(cmp.error == 0);
     assert(mem.offset == size_simple);
   }
   clock_t end = clock();
@@ -284,10 +292,9 @@ void enc_simple_radikant(perf_result_t *res) {
   for (int i = 0; i < ITERS_SIMPLE; i++) {
     mp_memory_stream_ctx_t mem_ctx;
     mp_stream_t stream;
-    mp_memory_stream_init_write_fixed(&stream, &mem_ctx, out_buf_simple,
-                                      size_simple);
+    mp_stream_init_write(&stream, &mem_ctx, false, out_buf_simple, size_simple);
     mp_error_t err = mp_encode_object(&stream, &ast_simple);
-      assert(err == MP_OK);
+    assert(err == MP_OK);
     assert(mem_ctx.size == size_simple);
   }
   clock_t end = clock();
@@ -305,7 +312,7 @@ void enc_hard_cmp(perf_result_t *res) {
     cmp_ctx_t cmp;
     cmp_init(&cmp, &mem, NULL, NULL, cmp_mem_writer);
     cmp_encode_mp_object(&cmp, &ast_hard);
-      assert(cmp.error == 0);
+    assert(cmp.error == 0);
     assert(mem.offset == size_hard);
   }
   clock_t end = clock();
@@ -319,10 +326,9 @@ void enc_hard_radikant(perf_result_t *res) {
   for (int i = 0; i < ITERS_HARD; i++) {
     mp_memory_stream_ctx_t mem_ctx;
     mp_stream_t stream;
-    mp_memory_stream_init_write_fixed(&stream, &mem_ctx, out_buf_hard,
-                                      size_hard);
+    mp_stream_init_write(&stream, &mem_ctx, false, out_buf_hard, size_hard);
     mp_error_t err = mp_encode_object(&stream, &ast_hard);
-      assert(err == MP_OK);
+    assert(err == MP_OK);
     assert(mem_ctx.size == size_hard);
   }
   clock_t end = clock();
@@ -340,7 +346,7 @@ void enc_diff_cmp(perf_result_t *res) {
     cmp_ctx_t cmp;
     cmp_init(&cmp, &mem, NULL, NULL, cmp_mem_writer);
     cmp_encode_mp_object(&cmp, &ast_diff);
-      assert(cmp.error == 0);
+    assert(cmp.error == 0);
     assert(mem.offset == size_diff);
   }
   clock_t end = clock();
@@ -354,10 +360,9 @@ void enc_diff_radikant(perf_result_t *res) {
   for (int i = 0; i < ITERS_DIFF; i++) {
     mp_memory_stream_ctx_t mem_ctx;
     mp_stream_t stream;
-    mp_memory_stream_init_write_fixed(&stream, &mem_ctx, out_buf_diff,
-                                      size_diff);
+    mp_stream_init_write(&stream, &mem_ctx, false, out_buf_diff, size_diff);
     mp_error_t err = mp_encode_object(&stream, &ast_diff);
-      assert(err == MP_OK);
+    assert(err == MP_OK);
     assert(mem_ctx.size == size_diff);
   }
   clock_t end = clock();

@@ -1,0 +1,82 @@
+RADIKANT-MESSAGEPACK-C - PERFORMANCE REVIEW
+=============================================
+
+SCOPE
+-----
+Reviewed encoder.c, decoder.c, zone.c, skip.c, stream.c, object.c
+(~2060 LOC total). Looking for structural inefficiencies only -
+not micro-optimizations.
+
+FINDING #1 (real, actionable)
+------------------------------
+Location : decoder.c, all four map-decode sites
+           (fixmap, MAP16, MAP32 - pattern duplicated 3x)
+
+Issue    : Map entries are allocated as two SEPARATE zone
+           allocations per entry, instead of stored by value.
+
+    out_obj->via.map.ptr[i].key =
+        (mp_object_t*) mp_zone_alloc(zone, sizeof(mp_object_t));
+    out_obj->via.map.ptr[i].val =
+        (mp_object_t*) mp_zone_alloc(zone, sizeof(mp_object_t));
+
+  Compare to array decoding, which allocates the whole element
+  block in ONE call:
+
+    out_obj->via.array.ptr =
+        mp_zone_alloc(zone, sizeof(mp_object_t) * len);
+
+  For a map with N entries:
+    - 1 alloc for the mp_object_kv_t array   (correct, matches array)
+    - 2N additional small zone_alloc calls   (unnecessary)
+
+  Root cause: mp_object_kv_t stores key/val as POINTERS
+
+    typedef struct {
+        mp_object_t* key;
+        mp_object_t* val;
+    } mp_object_kv_t;
+
+  instead of embedding them by value:
+
+    typedef struct {
+        mp_object_t key;
+        mp_object_t val;
+    } mp_object_kv_t;
+
+IMPACT
+------
+  - ~3x more zone_alloc calls than structurally necessary for
+    map-heavy payloads (common case: nested JSON-like objects).
+  - Extra pointer indirection paid on every READ after decode too
+    (ptr[i].key->via... vs a flat ptr[i].key.via...), not just
+    during parsing.
+  - Arrays don't have this problem - only maps.
+
+FIX
+---
+  Change mp_object_kv_t to hold key/val by value, decode directly
+  into ptr[i].key / ptr[i].val the same way array elements are
+  decoded directly into ptr[i]. Removes 2N allocations and one
+  pointer hop per access.
+
+OTHER AREAS CHECKED - NO REAL BOTTLENECK FOUND
+------------------------------------------------
+  - encoder.c: single mp_encode_bytes() per primitive, matches
+    normal streaming-encoder design, nothing wasteful.
+  - stream.c dynamic write buffer: capacity doubling loop is
+    correct amortized O(1) growth, no issue.
+  - zone.c bump allocator: leftover space in an exhausted chunk
+    is abandoned rather than reused - this is a known tradeoff
+    of arena allocators (same as msgpack-c), not a bug or a
+    meaningful bottleneck under normal chunk sizing.
+  - decoder.c byte-at-a-time header reads: inherent to the
+    streaming/vtable stream design, not fixable without changing
+    the whole I/O model - not "obvious" in the sense asked for.
+
+BOTTOM LINE
+-----------
+One real finding: map decoding does ~3x the allocation work
+arrays do, for no structural reason. Everything else in the hot
+path (recursion, stream reads, encoding) already does the
+minimal necessary work.

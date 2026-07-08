@@ -40,6 +40,10 @@ mp_error_t mp_encode_ext(mp_stream_t* stream, int8_t type, const char* data, uin
 // Generic Object Encoder
 mp_error_t mp_encode_object(mp_stream_t* stream, const mp_object_t* obj);
 
+// Encodes a complete MessagePack object into a dynamically allocated memory buffer.
+// The caller is responsible for freeing `out_data` using `free()`.
+mp_error_t mp_serialize_memory(const mp_object_t* obj, char** out_data, size_t* out_size);
+
 #ifdef __cplusplus
 }
 #endif

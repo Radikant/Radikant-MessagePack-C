@@ -8,5 +8,5 @@
 #include "../SRC/encoder.h"
 #include "../SRC/decoder.h"
 #include "../SRC/skip.h"
-
+#include "../SRC/builder.h"
 #endif // RADIKANT_MESSAGEPACK_C_H

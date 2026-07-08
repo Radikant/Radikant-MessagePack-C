@@ -35,13 +35,12 @@ typedef struct {
 } mp_memory_stream_ctx_t;
 
 // Initializes a stream for reading from a fixed memory buffer.
-void mp_memory_stream_init_read(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, const char* data, size_t size);
+void mp_stream_init_read(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, const char* data, size_t size);
 
-// Initializes a stream for writing to a fixed memory buffer.
-void mp_memory_stream_init_write_fixed(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, char* buf, size_t capacity);
-
-// Initializes a stream for writing to a dynamically growing heap buffer.
-void mp_memory_stream_init_write_dynamic(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx);
+// Initializes a stream for writing.
+// If is_dynamic == true, the stream auto-allocates. buf and capacity are ignored.
+// If is_dynamic == false, the stream writes to the fixed buf.
+void mp_stream_init_write(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, bool is_dynamic, char* buf, size_t capacity);
 
 // Frees dynamically allocated memory in a dynamic memory stream context.
 void mp_memory_stream_destroy(mp_memory_stream_ctx_t* ctx);
