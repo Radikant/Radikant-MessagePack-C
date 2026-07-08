@@ -10,6 +10,10 @@ static mp_error_t mem_read(mp_stream_t* stream, void* buf, size_t count) {
     
     memcpy(buf, ctx->data + ctx->offset, count);
     ctx->offset += count;
+
+    stream->fast_ptr = ctx->data + ctx->offset;
+    stream->fast_left = ctx->size - ctx->offset;
+
     return MP_OK;
 }
 
@@ -20,7 +24,7 @@ static mp_error_t mem_write(mp_stream_t* stream, const void* buf, size_t count) 
     mp_memory_stream_ctx_t* ctx = (mp_memory_stream_ctx_t*)stream->context;
     if (count > ctx->capacity - ctx->size) {
         if (!ctx->is_dynamic) return MP_ERROR_ENCODE_BUFFER_OVERFLOW;
-        size_t new_cap = ctx->capacity == 0 ? 128 : ctx->capacity * 2;
+        size_t new_cap = ctx->capacity == 0 ? 4096 : ctx->capacity * 2;
         while (new_cap - ctx->size < count) new_cap *= 2;
         char* new_data = (char*)realloc(ctx->data, new_cap);
         if (!new_data) return MP_ERROR_ENCODE_NOMEM;
@@ -29,6 +33,10 @@ static mp_error_t mem_write(mp_stream_t* stream, const void* buf, size_t count) 
     }
     memcpy(ctx->data + ctx->size, buf, count);
     ctx->size += count;
+
+    stream->fast_ptr = ctx->data + ctx->size;
+    stream->fast_left = ctx->capacity - ctx->size;
+
     return MP_OK;
 }
 
@@ -38,6 +46,10 @@ static mp_error_t mem_skip(mp_stream_t* stream, size_t count) {
     mp_memory_stream_ctx_t* ctx = (mp_memory_stream_ctx_t*)stream->context;
     if (count > ctx->size - ctx->offset) return MP_ERROR_DECODE_INCOMPLETE;
     ctx->offset += count;
+
+    stream->fast_ptr = ctx->data + ctx->offset;
+    stream->fast_left = ctx->size - ctx->offset;
+
     return MP_OK;
 }
 
@@ -53,6 +65,10 @@ void mp_stream_init_read(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, const
     stream->read = mem_read;
     stream->write = NULL;
     stream->skip = mem_skip;
+
+    stream->fast_ptr = ctx->data;
+    stream->fast_left = size;
+    stream->fast_size_ptr = &ctx->offset;
 }
 
 void mp_stream_init_write(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, bool is_dynamic, char* buf, size_t capacity) {
@@ -63,12 +79,20 @@ void mp_stream_init_write(mp_stream_t* stream, mp_memory_stream_ctx_t* ctx, bool
         ctx->capacity = 0;
         ctx->offset = 0;
         ctx->is_dynamic = true;
+
+        stream->fast_ptr = NULL;
+        stream->fast_left = 0;
+        stream->fast_size_ptr = &ctx->size;
     } else {
         ctx->data = buf;
         ctx->size = 0;
         ctx->capacity = capacity;
         ctx->offset = 0;
         ctx->is_dynamic = false;
+
+        stream->fast_ptr = buf;
+        stream->fast_left = capacity;
+        stream->fast_size_ptr = &ctx->size;
     }
 
     stream->context = ctx;
@@ -123,4 +147,8 @@ void mp_file_stream_init(mp_stream_t* stream, FILE* file) {
     stream->read = file_read;
     stream->write = file_write;
     stream->skip = file_skip;
+
+    stream->fast_ptr = NULL;
+    stream->fast_left = 0;
+    stream->fast_size_ptr = NULL;
 }

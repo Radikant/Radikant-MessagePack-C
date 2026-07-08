@@ -8,37 +8,42 @@ void mp_decoder_init(mp_decoder_t *decoder, mp_stream_t *stream,
     decoder->zone = zone;
     decoder->depth = 0;
     decoder->max_depth = 256;
+    decoder->zero_copy_strings = false;
   }
 }
 
-static inline uint16_t deserialize_be16(const char *buf) {
-  return ((uint16_t)(uint8_t)buf[0] << 8) | (uint16_t)(uint8_t)buf[1];
-}
+#include "tools/endian.h"
 
-static inline uint32_t deserialize_be32(const char *buf) {
-  return ((uint32_t)(uint8_t)buf[0] << 24) | ((uint32_t)(uint8_t)buf[1] << 16) |
-         ((uint32_t)(uint8_t)buf[2] << 8) | (uint32_t)(uint8_t)buf[3];
-}
-
-static inline uint64_t deserialize_be64(const char *buf) {
-  return ((uint64_t)(uint8_t)buf[0] << 56) | ((uint64_t)(uint8_t)buf[1] << 48) |
-         ((uint64_t)(uint8_t)buf[2] << 40) | ((uint64_t)(uint8_t)buf[3] << 32) |
-         ((uint64_t)(uint8_t)buf[4] << 24) | ((uint64_t)(uint8_t)buf[5] << 16) |
-         ((uint64_t)(uint8_t)buf[6] << 8) | (uint64_t)(uint8_t)buf[7];
-}
-
-static mp_error_t read_bytes(mp_decoder_t *decoder, void *buf, size_t len) {
-  if (len == 0)
-    return MP_OK;
-  if (!decoder->stream || !decoder->stream->read)
-    return MP_ERROR_BAD_ARG;
-  return decoder->stream->read(decoder->stream, buf, len);
+static inline mp_error_t read_bytes(mp_decoder_t *decoder, void *buf, size_t len) {
+  if (len == 0) return MP_OK;
+  mp_stream_t *stream = decoder->stream;
+  if (!stream) return MP_ERROR_BAD_ARG;
+  
+  if (stream->fast_left >= len) {
+      memcpy(buf, stream->fast_ptr, len);
+      stream->fast_ptr += len;
+      stream->fast_left -= len;
+      if (stream->fast_size_ptr) *(stream->fast_size_ptr) += len;
+      return MP_OK;
+  }
+  
+  if (!stream->read) return MP_ERROR_BAD_ARG;
+  return stream->read(stream, buf, len);
 }
 
 static mp_error_t read_string_to_zone(mp_decoder_t *decoder,
                                       mp_object_t *out_obj, uint32_t len) {
   out_obj->type = MP_TYPE_STR;
   out_obj->via.str.size = len;
+
+  if (decoder->zero_copy_strings && decoder->stream && decoder->stream->fast_left >= len) {
+      out_obj->via.str.ptr = decoder->stream->fast_ptr;
+      decoder->stream->fast_ptr += len;
+      decoder->stream->fast_left -= len;
+      if (decoder->stream->fast_size_ptr) *(decoder->stream->fast_size_ptr) += len;
+      return MP_OK;
+  }
+
   out_obj->via.str.ptr =
       len > 0 ? (char *)mp_zone_alloc(decoder->zone, len) : NULL;
   if (!out_obj->via.str.ptr && len > 0)
@@ -53,6 +58,15 @@ static mp_error_t read_bin_to_zone(mp_decoder_t *decoder, mp_object_t *out_obj,
                                    uint32_t len) {
   out_obj->type = MP_TYPE_BIN;
   out_obj->via.bin.size = len;
+
+  if (decoder->zero_copy_strings && decoder->stream && decoder->stream->fast_left >= len) {
+      out_obj->via.bin.ptr = decoder->stream->fast_ptr;
+      decoder->stream->fast_ptr += len;
+      decoder->stream->fast_left -= len;
+      if (decoder->stream->fast_size_ptr) *(decoder->stream->fast_size_ptr) += len;
+      return MP_OK;
+  }
+
   out_obj->via.bin.ptr =
       len > 0 ? (char *)mp_zone_alloc(decoder->zone, len) : NULL;
   if (!out_obj->via.bin.ptr && len > 0)
@@ -73,6 +87,15 @@ static mp_error_t read_ext_to_zone(mp_decoder_t *decoder, mp_object_t *out_obj,
   out_obj->type = MP_TYPE_EXT;
   out_obj->via.ext.type = (int8_t)ext_type;
   out_obj->via.ext.size = len;
+
+  if (decoder->zero_copy_strings && decoder->stream && decoder->stream->fast_left >= len) {
+      out_obj->via.ext.ptr = decoder->stream->fast_ptr;
+      decoder->stream->fast_ptr += len;
+      decoder->stream->fast_left -= len;
+      if (decoder->stream->fast_size_ptr) *(decoder->stream->fast_size_ptr) += len;
+      return MP_OK;
+  }
+
   out_obj->via.ext.ptr =
       len > 0 ? (char *)mp_zone_alloc(decoder->zone, len) : NULL;
   if (!out_obj->via.ext.ptr && len > 0)
@@ -94,17 +117,21 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
   if (err != MP_OK)
     return err;
 
-  if (b <= MP_TAG_FIXINT_MAX) {
+  switch (b) {
+  case 0x00 ... MP_TAG_FIXINT_MAX:
     out_obj->type = MP_TYPE_POSITIVE_INTEGER;
     out_obj->via.u64 = b;
     return MP_OK;
-  } else if (b >= MP_TAG_NEGFIXINT_MIN) {
+
+  case MP_TAG_NEGFIXINT_MIN ... 0xFF:
     out_obj->type = MP_TYPE_NEGATIVE_INTEGER;
     out_obj->via.i64 = (int8_t)b;
     return MP_OK;
-  } else if (b >= MP_TAG_FIXSTR_MIN && b <= MP_TAG_FIXSTR_MAX) {
+
+  case MP_TAG_FIXSTR_MIN ... MP_TAG_FIXSTR_MAX:
     return read_string_to_zone(decoder, out_obj, b & 0x1f);
-  } else if (b >= MP_TAG_FIXARRAY_MIN && b <= MP_TAG_FIXARRAY_MAX) {
+
+  case MP_TAG_FIXARRAY_MIN ... MP_TAG_FIXARRAY_MAX: {
     uint32_t len = b & 0x0f;
     if ((size_t)len > ((size_t)-1) / sizeof(mp_object_t))
       return MP_ERROR_NOMEM;
@@ -124,7 +151,9 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
         return err;
     }
     return MP_OK;
-  } else if (b >= MP_TAG_FIXMAP_MIN && b <= MP_TAG_FIXMAP_MAX) {
+  }
+
+  case MP_TAG_FIXMAP_MIN ... MP_TAG_FIXMAP_MAX: {
     uint32_t len = b & 0x0f;
     if ((size_t)len > ((size_t)-1) / sizeof(mp_object_kv_t))
       return MP_ERROR_NOMEM;
@@ -148,7 +177,6 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     return MP_OK;
   }
 
-  switch (b) {
   case MP_TAG_NIL:
     out_obj->type = MP_TYPE_NIL;
     break;
@@ -443,11 +471,19 @@ mp_error_t mp_decode(mp_decoder_t *decoder, mp_object_t *out_obj) {
 // -------------------------------------------------------------------------
 // Incremental Streaming Decoders (SAX API)
 // -------------------------------------------------------------------------
-static mp_error_t stream_read(mp_stream_t *stream, void *buf, size_t count) {
-  if (count == 0)
-    return MP_OK;
-  if (!stream || !stream->read)
-    return MP_ERROR_BAD_ARG;
+static inline mp_error_t stream_read(mp_stream_t *stream, void *buf, size_t count) {
+  if (count == 0) return MP_OK;
+  if (!stream) return MP_ERROR_BAD_ARG;
+
+  if (stream->fast_left >= count) {
+      memcpy(buf, stream->fast_ptr, count);
+      stream->fast_ptr += count;
+      stream->fast_left -= count;
+      if (stream->fast_size_ptr) *(stream->fast_size_ptr) += count;
+      return MP_OK;
+  }
+
+  if (!stream->read) return MP_ERROR_BAD_ARG;
   return stream->read(stream, buf, count);
 }
 

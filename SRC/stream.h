@@ -23,6 +23,11 @@ struct mp_stream_s {
     mp_stream_read_fn read;
     mp_stream_write_fn write;
     mp_stream_skip_fn skip;
+
+    // Fast-path I/O for direct memory access (zero-call buffering)
+    char* fast_ptr;
+    size_t fast_left;
+    size_t* fast_size_ptr; // Points to ctx->size (for write) or ctx->offset (for read)
 };
 
 // Memory Stream Context

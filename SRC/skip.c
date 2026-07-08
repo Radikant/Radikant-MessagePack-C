@@ -1,16 +1,18 @@
 #include "skip.h"
 
-static inline uint16_t deserialize_be16(const char* buf) {
-    return ((uint16_t)(uint8_t)buf[0] << 8) | (uint16_t)(uint8_t)buf[1];
-}
-
-static inline uint32_t deserialize_be32(const char* buf) {
-    return ((uint32_t)(uint8_t)buf[0] << 24) | ((uint32_t)(uint8_t)buf[1] << 16) | ((uint32_t)(uint8_t)buf[2] << 8) | (uint32_t)(uint8_t)buf[3];
-}
+#include "tools/endian.h"
 
 static mp_error_t stream_skip(mp_decoder_t* decoder, size_t count) {
     if (count == 0) return MP_OK;
-    if (!decoder->stream) return MP_ERROR_BAD_ARG;
+    mp_stream_t *stream = decoder->stream;
+    if (!stream) return MP_ERROR_BAD_ARG;
+
+    if (stream->fast_left >= count) {
+        stream->fast_ptr += count;
+        stream->fast_left -= count;
+        if (stream->fast_size_ptr) *(stream->fast_size_ptr) += count;
+        return MP_OK;
+    }
     if (decoder->stream->skip) {
         return decoder->stream->skip(decoder->stream, count);
     } else if (decoder->stream->read) {
@@ -30,8 +32,19 @@ static mp_error_t stream_skip(mp_decoder_t* decoder, size_t count) {
 
 static mp_error_t stream_read(mp_decoder_t* decoder, void* buf, size_t count) {
     if (count == 0) return MP_OK;
-    if (!decoder->stream || !decoder->stream->read) return MP_ERROR_BAD_ARG;
-    return decoder->stream->read(decoder->stream, buf, count);
+    mp_stream_t *stream = decoder->stream;
+    if (!stream) return MP_ERROR_BAD_ARG;
+
+    if (stream->fast_left >= count) {
+        memcpy(buf, stream->fast_ptr, count);
+        stream->fast_ptr += count;
+        stream->fast_left -= count;
+        if (stream->fast_size_ptr) *(stream->fast_size_ptr) += count;
+        return MP_OK;
+    }
+
+    if (!stream->read) return MP_ERROR_BAD_ARG;
+    return stream->read(stream, buf, count);
 }
 
 mp_error_t mp_skip(mp_decoder_t* decoder) {

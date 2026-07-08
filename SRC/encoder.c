@@ -3,19 +3,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-static inline void serialize_be16(char* buf, uint16_t v) {
-    buf[0] = (char)(v >> 8); buf[1] = (char)v;
-}
-static inline void serialize_be32(char* buf, uint32_t v) {
-    buf[0] = (char)(v >> 24); buf[1] = (char)(v >> 16); buf[2] = (char)(v >> 8); buf[3] = (char)v;
-}
-static inline void serialize_be64(char* buf, uint64_t v) {
-    buf[0] = (char)(v >> 56); buf[1] = (char)(v >> 48); buf[2] = (char)(v >> 40); buf[3] = (char)(v >> 32);
-    buf[4] = (char)(v >> 24); buf[5] = (char)(v >> 16); buf[6] = (char)(v >> 8); buf[7] = (char)v;
-}
+#include "tools/endian.h"
 
 static inline mp_error_t mp_encode_bytes(mp_stream_t* stream, const void* data, size_t len) {
-    if (!stream || !stream->write) return MP_ERROR_BAD_ARG;
+    if (!stream) return MP_ERROR_BAD_ARG;
+    if (stream->fast_left >= len) {
+        memcpy(stream->fast_ptr, data, len);
+        stream->fast_ptr += len;
+        stream->fast_left -= len;
+        if (stream->fast_size_ptr) *(stream->fast_size_ptr) += len;
+        return MP_OK;
+    }
+    if (!stream->write) return MP_ERROR_BAD_ARG;
     return stream->write(stream, data, len);
 }
 

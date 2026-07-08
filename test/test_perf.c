@@ -92,6 +92,7 @@ void comp_simple_radikant(perf_result_t *res) {
 
     mp_decoder_t decoder;
     mp_decoder_init(&decoder, &stream, &zone);
+    decoder.zero_copy_strings = true;
 
     mp_object_t obj;
     mp_error_t err = mp_decode(&decoder, &obj);
@@ -139,6 +140,7 @@ void comp_hard_radikant(perf_result_t *res) {
 
     mp_decoder_t decoder;
     mp_decoder_init(&decoder, &stream, &zone);
+    decoder.zero_copy_strings = true;
 
     mp_object_t obj;
     mp_error_t err = mp_decode(&decoder, &obj);
@@ -186,6 +188,7 @@ void comp_diff_radikant(perf_result_t *res) {
 
     mp_decoder_t decoder;
     mp_decoder_init(&decoder, &stream, &zone);
+    decoder.zero_copy_strings = true;
 
     mp_object_t obj;
     mp_error_t err = mp_decode(&decoder, &obj);

@@ -18,6 +18,7 @@ typedef struct {
     mp_zone_t* zone;
     uint32_t depth;
     uint32_t max_depth;
+    bool zero_copy_strings; // If true, string/bin/ext payload uses stream->fast_ptr without allocating
 } mp_decoder_t;
 
 void mp_decoder_init(mp_decoder_t* decoder, mp_stream_t* stream, mp_zone_t* zone);
