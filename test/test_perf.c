@@ -526,6 +526,42 @@ void enc_diff_mpack(perf_result_t *res) {
   perf_record_speed(res, mb / elapsed);
 }
 
+void skip_simple_radikant(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_SIMPLE; i++) {
+    mp_error_t err = mp_skip_memory(buf_simple, size_simple);
+    assert(err == MP_OK);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_simple * ITERS_SIMPLE) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+void skip_hard_radikant(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_HARD; i++) {
+    mp_error_t err = mp_skip_memory(buf_hard, size_hard);
+    assert(err == MP_OK);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_hard * ITERS_HARD) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+void skip_diff_radikant(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_DIFF; i++) {
+    mp_error_t err = mp_skip_memory(buf_diff, size_diff);
+    assert(err == MP_OK);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_diff * ITERS_DIFF) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
 int main() {
   buf_simple = read_file_to_mem(
       PROJECT_ROOT "/test/vectors/test/simple/simple1.bin", &size_simple);
@@ -603,6 +639,21 @@ int main() {
 
   run_perf_suite(&dec_suite);
   free_perf_suite(&dec_suite);
+
+  perf_suite_t skip_suite;
+  init_perf_suite(&skip_suite, "MessagePack Skipping Performance");
+
+  add_perf_test(&skip_suite, false, true, "SIMPLE VECTOR", "cmp", comp_simple_cmp); // CMP decodes by skipping
+  add_perf_test(&skip_suite, true, true, "SIMPLE VECTOR", "radikant", skip_simple_radikant);
+
+  add_perf_test(&skip_suite, false, true, "HARD VECTOR", "cmp", comp_hard_cmp);
+  add_perf_test(&skip_suite, true, true, "HARD VECTOR", "radikant", skip_hard_radikant);
+
+  add_perf_test(&skip_suite, false, true, "DIFFICULT VECTOR", "cmp", comp_diff_cmp);
+  add_perf_test(&skip_suite, true, true, "DIFFICULT VECTOR", "radikant", skip_diff_radikant);
+
+  run_perf_suite(&skip_suite);
+  free_perf_suite(&skip_suite);
 
   free(buf_simple);
   free(buf_hard);

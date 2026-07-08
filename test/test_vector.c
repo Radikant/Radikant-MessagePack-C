@@ -49,9 +49,12 @@ bool vector_test_simple(test_result_t *test) { return test_vector_file_radikant(
 bool vector_test_hard(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/test/hard/hard1.bin", MP_OK); }
 bool vector_test_difficult(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/test/difficult/diff1.bin", MP_OK); }
 bool vector_test_depth_bomb(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallicious/depth_bomb.bin", MP_ERROR_DECODE_DEPTH_EXCEEDED); }
+bool vector_test_depth_bomb_map(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallicious/depth_bomb_map.bin", MP_ERROR_DECODE_DEPTH_EXCEEDED); }
 bool vector_test_oom_map(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_map.bin", MP_ERROR_DECODE_INCOMPLETE); }
 bool vector_test_oom_array(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_array.bin", MP_ERROR_DECODE_INCOMPLETE); }
 bool vector_test_oom_str(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_str.bin", MP_ERROR_DECODE_TRUNCATED_STR); }
+bool vector_test_oom_bin(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_bin.bin", MP_ERROR_DECODE_TRUNCATED_BIN); }
+bool vector_test_oom_ext(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_ext.bin", MP_ERROR_DECODE_TRUNCATED_EXT); }
 bool vector_test_truncated(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/truncated.bin", MP_ERROR_DECODE_INCOMPLETE); }
 bool vector_test_invalid_tag(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/invalid_tag.bin", MP_ERROR_DECODE_INVALID_FORMAT); }
 bool vector_test_trunc_uint32(test_result_t *test) { return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_uint32.bin", MP_ERROR_DECODE_INCOMPLETE); }
@@ -68,9 +71,12 @@ bool cmp_vector_test_simple(test_result_t *test) { return test_vector_file_cmp(t
 bool cmp_vector_test_hard(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/test/hard/hard1.bin", true); }
 bool cmp_vector_test_difficult(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/test/difficult/diff1.bin", true); }
 bool cmp_vector_test_depth_bomb(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallicious/depth_bomb.bin", false); }
+bool cmp_vector_test_depth_bomb_map(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallicious/depth_bomb_map.bin", false); }
 bool cmp_vector_test_oom_map(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_map.bin", false); }
 bool cmp_vector_test_oom_array(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_array.bin", false); }
 bool cmp_vector_test_oom_str(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_str.bin", false); }
+bool cmp_vector_test_oom_bin(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_bin.bin", false); }
+bool cmp_vector_test_oom_ext(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallicious/oom_ext.bin", false); }
 bool cmp_vector_test_truncated(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/truncated.bin", false); }
 bool cmp_vector_test_invalid_tag(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/invalid_tag.bin", false); }
 bool cmp_vector_test_trunc_uint32(test_result_t *test) { return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_uint32.bin", false); }
@@ -95,9 +101,12 @@ int main(void) {
     add_test(&suite_vector, vector_test_hard, "Vector (Radikant): Hard", "MsgPack-Spec");
     add_test(&suite_vector, vector_test_difficult, "Vector (Radikant): Difficult", "MsgPack-Spec");
     add_test(&suite_vector, vector_test_depth_bomb, "Vector Attack (Radikant): Depth Bomb", "MsgPack-Spec");
+    add_test(&suite_vector, vector_test_depth_bomb_map, "Vector Attack (Radikant): Map Depth Bomb", "MsgPack-Spec");
     add_test(&suite_vector, vector_test_oom_map, "Vector Attack (Radikant): OOM Map", "MsgPack-Spec");
     add_test(&suite_vector, vector_test_oom_array, "Vector Attack (Radikant): OOM Array", "MsgPack-Spec");
     add_test(&suite_vector, vector_test_oom_str, "Vector Attack (Radikant): OOM Str", "MsgPack-Spec");
+    add_test(&suite_vector, vector_test_oom_bin, "Vector Attack (Radikant): OOM Bin", "MsgPack-Spec");
+    add_test(&suite_vector, vector_test_oom_ext, "Vector Attack (Radikant): OOM Ext", "MsgPack-Spec");
     add_test(&suite_vector, vector_test_truncated, "Vector Attack (Radikant): Truncated Map", "MsgPack-Spec");
     add_test(&suite_vector, vector_test_invalid_tag, "Vector Attack (Radikant): Invalid Tag", "MsgPack-Spec");
     add_test(&suite_vector, vector_test_trunc_uint32, "Vector Attack (Radikant): Trunc UInt32", "MsgPack-Spec");
@@ -108,9 +117,12 @@ int main(void) {
     add_test(&suite_vector, cmp_vector_test_hard, "Vector (CMP): Hard", "MsgPack-Spec");
     add_test(&suite_vector, cmp_vector_test_difficult, "Vector (CMP): Difficult", "MsgPack-Spec");
     add_test(&suite_vector, cmp_vector_test_depth_bomb, "Vector Attack (CMP): Depth Bomb", "MsgPack-Spec");
+    add_test(&suite_vector, cmp_vector_test_depth_bomb_map, "Vector Attack (CMP): Map Depth Bomb", "MsgPack-Spec");
     add_test(&suite_vector, cmp_vector_test_oom_map, "Vector Attack (CMP): OOM Map", "MsgPack-Spec");
     add_test(&suite_vector, cmp_vector_test_oom_array, "Vector Attack (CMP): OOM Array", "MsgPack-Spec");
     add_test(&suite_vector, cmp_vector_test_oom_str, "Vector Attack (CMP): OOM Str", "MsgPack-Spec");
+    add_test(&suite_vector, cmp_vector_test_oom_bin, "Vector Attack (CMP): OOM Bin", "MsgPack-Spec");
+    add_test(&suite_vector, cmp_vector_test_oom_ext, "Vector Attack (CMP): OOM Ext", "MsgPack-Spec");
     add_test(&suite_vector, cmp_vector_test_truncated, "Vector Attack (CMP): Truncated Map", "MsgPack-Spec");
     add_test(&suite_vector, cmp_vector_test_invalid_tag, "Vector Attack (CMP): Invalid Tag", "MsgPack-Spec");
     add_test(&suite_vector, cmp_vector_test_trunc_uint32, "Vector Attack (CMP): Trunc UInt32", "MsgPack-Spec");

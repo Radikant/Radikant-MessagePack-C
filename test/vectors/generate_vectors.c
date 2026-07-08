@@ -203,6 +203,25 @@ void gen_mallicious() {
   // 4. OOM Array: Array32 tag (0xdd) requesting 0xFFFFFFFF elements.
   char oom_array[] = {(char)0xdd, (char)0xff, (char)0xff, (char)0xff, (char)0xff};
   write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/oom_array.bin", oom_array, sizeof(oom_array));
+
+  // 5. OOM Bin: Bin32 tag (0xc6) requesting 0xFFFFFFFF bytes.
+  char oom_bin[] = {(char)0xc6, (char)0xff, (char)0xff, (char)0xff, (char)0xff};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/oom_bin.bin", oom_bin, sizeof(oom_bin));
+
+  // 6. OOM Ext: Ext32 tag (0xc9) requesting 0xFFFFFFFF bytes.
+  char oom_ext[] = {(char)0xc9, (char)0xff, (char)0xff, (char)0xff, (char)0xff, (char)0x01};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/oom_ext.bin", oom_ext, sizeof(oom_ext));
+
+  // 7. Map Depth Bomb: 500 levels of nested maps.
+  // 0x81 (Map 1) -> 0x00 (Key 0) -> 0x81 (Map 1)...
+  char map_bomb[1000];
+  for (int i = 0; i < 500; i++) {
+    map_bomb[i * 2] = (char)0x81;
+    map_bomb[i * 2 + 1] = (char)0x00;
+  }
+  // Terminate inner most with a 0 value
+  map_bomb[999] = (char)0x00;
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallicious/depth_bomb_map.bin", map_bomb, sizeof(map_bomb));
 }
 
 void gen_mallformed() {
