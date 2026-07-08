@@ -17,7 +17,7 @@ target_compile_definitions(GENERATE-VECTORS PRIVATE PROJECT_ROOT="${CMAKE_SOURCE
 # ---- Link Executables ----
 target_link_libraries(TST-MESSAGE-PACK PRIVATE Radikant-MessagePack-C Radikant-Probe-C)
 target_link_libraries(TST-VECTOR       PRIVATE Radikant-MessagePack-C Radikant-Probe-C)
-target_link_libraries(TST-PERF         PRIVATE Radikant-MessagePack-C Radikant-Probe-C)
+target_link_libraries(TST-PERF         PRIVATE Radikant-MessagePack-C Radikant-Probe-C mpack)
 target_link_libraries(TST-FUZZ         PRIVATE Radikant-MessagePack-C Radikant-Probe-C)
 target_link_libraries(TST-ROUNDTRIP    PRIVATE Radikant-MessagePack-C Radikant-Probe-C)
 target_link_libraries(TST-SAX          PRIVATE Radikant-MessagePack-C Radikant-Probe-C)

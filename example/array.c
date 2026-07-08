@@ -15,19 +15,10 @@ int encode_builder_example(mp_zone_t *zone, mp_memory_stream_ctx_t *out_ctx) {
   mp_object_t array;
   mp_build_array(zone, &array, 4);
 
-  mp_object_t item;
-  
-  mp_build_double(&item, 98.6);
-  mp_array_set(&array, 0, item);
-  
-  mp_build_int(&item, -10);
-  mp_array_set(&array, 1, item);
-  
-  mp_build_cstr(&item, "Sunny");
-  mp_array_set(&array, 2, item);
-  
-  mp_build_bool(&item, true);
-  mp_array_set(&array, 3, item);
+  mp_array_set_double(&array, 0, 98.6);
+  mp_array_set_int(&array, 1, -10);
+  mp_array_set_str(&array, 2, "Sunny");
+  mp_array_set_bool(&array, 3, true);
 
   printf("[BUILDER ENCODE] Building AST array: [98.6, -10, \"Sunny\", true]\n");
 
@@ -62,15 +53,21 @@ int decode_builder_example(mp_zone_t *zone, const char* data, size_t size) {
   }
 
   if (ast.type == MP_TYPE_ARRAY && ast.via.array.size == 4) {
-    mp_object_t *val1 = &ast.via.array.ptr[0];
-    mp_object_t *val2 = &ast.via.array.ptr[1];
-    mp_object_t *val3 = &ast.via.array.ptr[2];
-    mp_object_t *val4 = &ast.via.array.ptr[3];
+    double val1;
+    int64_t val2;
+    const char* val3_str;
+    uint32_t val3_len;
+    bool val4;
 
-    printf("[BUILDER DECODE] Index 0 (Double): %.1f\n", val1->via.f64);
-    printf("[BUILDER DECODE] Index 1 (Int)   : %lld\n", (long long)val2->via.i64);
-    printf("[BUILDER DECODE] Index 2 (String): %.*s\n", (int)val3->via.str.size, val3->via.str.ptr);
-    printf("[BUILDER DECODE] Index 3 (Bool)  : %s\n", val4->via.boolean ? "true" : "false");
+    mp_object_as_double(mp_array_get(&ast, 0), &val1);
+    mp_object_as_int(mp_array_get(&ast, 1), &val2);
+    mp_object_as_str(mp_array_get(&ast, 2), &val3_str, &val3_len);
+    mp_object_as_bool(mp_array_get(&ast, 3), &val4);
+
+    printf("[BUILDER DECODE] Index 0 (Double): %.1f\n", val1);
+    printf("[BUILDER DECODE] Index 1 (Int)   : %lld\n", (long long)val2);
+    printf("[BUILDER DECODE] Index 2 (String): %.*s\n", (int)val3_len, val3_str);
+    printf("[BUILDER DECODE] Index 3 (Bool)  : %s\n", val4 ? "true" : "false");
   }
   printf("\n");
   return 0;

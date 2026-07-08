@@ -9,6 +9,7 @@
 // Radikant
 #include <radikant-messagepack-c.h>
 #include <radikant-probe-c.h>
+#include <mpack.h>
 
 #include "../reference/cmp.h"
 
@@ -201,6 +202,56 @@ void comp_diff_radikant(perf_result_t *res) {
   perf_record_speed(res, mb / elapsed);
 }
 
+
+void comp_simple_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_SIMPLE; i++) {
+    mpack_tree_t tree;
+    mpack_tree_init_data(&tree, buf_simple, size_simple);
+    mpack_tree_parse(&tree);
+    mpack_error_t err = mpack_tree_error(&tree);
+    assert(err == mpack_ok);
+    mpack_tree_destroy(&tree);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_simple * ITERS_SIMPLE) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+void comp_hard_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_HARD; i++) {
+    mpack_tree_t tree;
+    mpack_tree_init_data(&tree, buf_hard, size_hard);
+    mpack_tree_parse(&tree);
+    mpack_error_t err = mpack_tree_error(&tree);
+    assert(err == mpack_ok);
+    mpack_tree_destroy(&tree);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_hard * ITERS_HARD) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+void comp_diff_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_DIFF; i++) {
+    mpack_tree_t tree;
+    mpack_tree_init_data(&tree, buf_diff, size_diff);
+    mpack_tree_parse(&tree);
+    mpack_error_t err = mpack_tree_error(&tree);
+    assert(err == mpack_ok);
+    mpack_tree_destroy(&tree);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_diff * ITERS_DIFF) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+
 // --- Encoding Global ASTs ---
 mp_zone_t global_zone;
 mp_object_t ast_simple;
@@ -255,6 +306,56 @@ static void cmp_encode_mp_object(cmp_ctx_t *cmp, const mp_object_t *obj) {
     break;
   case MP_TYPE_EXT:
     cmp_write_ext(cmp, obj->via.ext.type, obj->via.ext.size, obj->via.ext.ptr);
+    break;
+  }
+}
+
+
+static void mpack_encode_mp_object(mpack_writer_t *writer, const mp_object_t *obj) {
+  if (!obj)
+    return;
+  switch (obj->type) {
+  case MP_TYPE_NIL:
+    mpack_write_nil(writer);
+    break;
+  case MP_TYPE_BOOLEAN:
+    mpack_write_bool(writer, obj->via.boolean);
+    break;
+  case MP_TYPE_POSITIVE_INTEGER:
+    mpack_write_u64(writer, obj->via.u64);
+    break;
+  case MP_TYPE_NEGATIVE_INTEGER:
+    mpack_write_i64(writer, obj->via.i64);
+    break;
+  case MP_TYPE_FLOAT32:
+    mpack_write_float(writer, obj->via.f32);
+    break;
+  case MP_TYPE_FLOAT64:
+    mpack_write_double(writer, obj->via.f64);
+    break;
+  case MP_TYPE_STR:
+    mpack_write_str(writer, obj->via.str.ptr, obj->via.str.size);
+    break;
+  case MP_TYPE_BIN:
+    mpack_write_bin(writer, obj->via.bin.ptr, obj->via.bin.size);
+    break;
+  case MP_TYPE_ARRAY:
+    mpack_start_array(writer, obj->via.array.size);
+    for (uint32_t i = 0; i < obj->via.array.size; i++) {
+      mpack_encode_mp_object(writer, &obj->via.array.ptr[i]);
+    }
+    mpack_finish_array(writer);
+    break;
+  case MP_TYPE_MAP:
+    mpack_start_map(writer, obj->via.map.size);
+    for (uint32_t i = 0; i < obj->via.map.size; i++) {
+      mpack_encode_mp_object(writer, &obj->via.map.ptr[i].key);
+      mpack_encode_mp_object(writer, &obj->via.map.ptr[i].val);
+    }
+    mpack_finish_map(writer);
+    break;
+  case MP_TYPE_EXT:
+    mpack_write_ext(writer, obj->via.ext.type, obj->via.ext.ptr, obj->via.ext.size);
     break;
   }
 }
@@ -370,6 +471,58 @@ void enc_diff_radikant(perf_result_t *res) {
   double mb = (double)(size_diff * ITERS_DIFF) / (1024.0 * 1024.0);
   perf_record_speed(res, mb / elapsed);
 }
+
+void enc_simple_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_SIMPLE; i++) {
+    mpack_writer_t writer;
+    mpack_writer_init(&writer, out_buf_simple, size_simple);
+    mpack_encode_mp_object(&writer, &ast_simple);
+    size_t used = mpack_writer_buffer_used(&writer);
+    mpack_error_t err = mpack_writer_destroy(&writer);
+    assert(err == mpack_ok);
+    assert(used == size_simple);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_simple * ITERS_SIMPLE) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+void enc_hard_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_HARD; i++) {
+    mpack_writer_t writer;
+    mpack_writer_init(&writer, out_buf_hard, size_hard);
+    mpack_encode_mp_object(&writer, &ast_hard);
+    size_t used = mpack_writer_buffer_used(&writer);
+    mpack_error_t err = mpack_writer_destroy(&writer);
+    assert(err == mpack_ok);
+    assert(used == size_hard);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_hard * ITERS_HARD) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+void enc_diff_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_DIFF; i++) {
+    mpack_writer_t writer;
+    mpack_writer_init(&writer, out_buf_diff, size_diff);
+    mpack_encode_mp_object(&writer, &ast_diff);
+    size_t used = mpack_writer_buffer_used(&writer);
+    mpack_error_t err = mpack_writer_destroy(&writer);
+    assert(err == mpack_ok);
+    assert(used == size_diff);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_diff * ITERS_DIFF) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
 int main() {
   buf_simple = read_file_to_mem(
       PROJECT_ROOT "/test/vectors/test/simple/simple1.bin", &size_simple);
@@ -401,15 +554,21 @@ int main() {
 
   add_perf_test(&enc_suite, false, true, "SIMPLE VECTOR", "cmp",
                 enc_simple_cmp);
+  add_perf_test(&enc_suite, false, true, "SIMPLE VECTOR", "mpack",
+                enc_simple_mpack);
   add_perf_test(&enc_suite, true, true, "SIMPLE VECTOR", "radikant",
                 enc_simple_radikant);
 
   add_perf_test(&enc_suite, false, true, "HARD VECTOR", "cmp", enc_hard_cmp);
+  add_perf_test(&enc_suite, false, true, "HARD VECTOR", "mpack",
+                enc_hard_mpack);
   add_perf_test(&enc_suite, true, true, "HARD VECTOR", "radikant",
                 enc_hard_radikant);
 
   add_perf_test(&enc_suite, false, true, "DIFFICULT VECTOR", "cmp",
                 enc_diff_cmp);
+  add_perf_test(&enc_suite, false, true, "DIFFICULT VECTOR", "mpack",
+                enc_diff_mpack);
   add_perf_test(&enc_suite, true, true, "DIFFICULT VECTOR", "radikant",
                 enc_diff_radikant);
 
@@ -421,15 +580,21 @@ int main() {
 
   add_perf_test(&dec_suite, false, true, "SIMPLE VECTOR", "cmp",
                 comp_simple_cmp);
+  add_perf_test(&dec_suite, false, true, "SIMPLE VECTOR", "mpack",
+                comp_simple_mpack);
   add_perf_test(&dec_suite, true, true, "SIMPLE VECTOR", "radikant",
                 comp_simple_radikant);
 
   add_perf_test(&dec_suite, false, true, "HARD VECTOR", "cmp", comp_hard_cmp);
+  add_perf_test(&dec_suite, false, true, "HARD VECTOR", "mpack",
+                comp_hard_mpack);
   add_perf_test(&dec_suite, true, true, "HARD VECTOR", "radikant",
                 comp_hard_radikant);
 
   add_perf_test(&dec_suite, false, true, "DIFFICULT VECTOR", "cmp",
                 comp_diff_cmp);
+  add_perf_test(&dec_suite, false, true, "DIFFICULT VECTOR", "mpack",
+                comp_diff_mpack);
   add_perf_test(&dec_suite, true, true, "DIFFICULT VECTOR", "radikant",
                 comp_diff_radikant);
 

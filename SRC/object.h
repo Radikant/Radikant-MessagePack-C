@@ -62,6 +62,14 @@ struct mp_object_kv_t {
     mp_object_t val;
 };
 
+// Collection Getters
+static inline mp_object_t* mp_array_get(const mp_object_t* array_obj, uint32_t index) {
+    if (!array_obj || array_obj->type != MP_TYPE_ARRAY || index >= array_obj->via.array.size) {
+        return NULL;
+    }
+    return &array_obj->via.array.ptr[index];
+}
+
 // Safe Accessors
 mp_error_t mp_object_as_nil(const mp_object_t* obj);
 mp_error_t mp_object_as_bool(const mp_object_t* obj, bool* out);

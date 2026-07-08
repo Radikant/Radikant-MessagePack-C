@@ -10,3 +10,13 @@
 	path = lib/Radikant-Log-C
 	url = https://github.com/Radikant/Radikant-Log-C.git
 	branch = main
+
+# Performance Testing / Reference Implementations:
+[submodule "lib/mpack"]
+	path = lib/mpack
+	url = https://github.com/ludocode/mpack.git
+	branch = develop
+[submodule "lib/cmp"]
+	path = lib/cmp
+	url = https://github.com/camgunz/cmp.git
+	branch = master

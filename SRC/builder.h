@@ -146,6 +146,30 @@ static inline mp_error_t mp_map_set_double(mp_object_t* map_obj, uint32_t index,
     return mp_map_set(map_obj, index, k, v);
 }
 
+// Quick setters for common array values
+static inline mp_error_t mp_array_set_str(mp_object_t* array_obj, uint32_t index, const char* val) {
+    mp_object_t item;
+    mp_build_cstr(&item, val);
+    return mp_array_set(array_obj, index, item);
+}
+
+static inline mp_error_t mp_array_set_int(mp_object_t* array_obj, uint32_t index, int64_t val) {
+    mp_object_t item;
+    mp_build_int(&item, val);
+    return mp_array_set(array_obj, index, item);
+}
+
+static inline mp_error_t mp_array_set_bool(mp_object_t* array_obj, uint32_t index, bool val) {
+    mp_object_t item;
+    mp_build_bool(&item, val);
+    return mp_array_set(array_obj, index, item);
+}
+
+static inline mp_error_t mp_array_set_double(mp_object_t* array_obj, uint32_t index, double val) {
+    mp_object_t item;
+    mp_build_double(&item, val);
+    return mp_array_set(array_obj, index, item);
+}
 
 #ifdef __cplusplus
 }
