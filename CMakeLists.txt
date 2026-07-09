@@ -37,6 +37,7 @@ add_library(Radikant-MessagePack-C SHARED
     SRC/stream.c
     SRC/builder.c
     SRC/query.c
+    SRC/tools/print.c
 )
 
 # ---- Includess ----

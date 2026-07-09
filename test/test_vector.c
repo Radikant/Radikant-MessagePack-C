@@ -1,9 +1,14 @@
-#include "../include/radikant-messagepack-c.h"
-#include <cmp.h>
-#include "probe.h"
+// STD
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// Radikant
+#include <radikant-messagepack-c.h>
+#include <radikant-probe-c.h>
+
+// CPM LIB
+#include <cmp.h>
 
 // cmp memory reader/writer context
 typedef struct {

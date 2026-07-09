@@ -9,4 +9,6 @@
 #include "../SRC/decoder.h"
 #include "../SRC/skip.h"
 #include "../SRC/builder.h"
+#include "../SRC/query.h"
+#include "../SRC/tools/print.h"
 #endif // RADIKANT_MESSAGEPACK_C_H
