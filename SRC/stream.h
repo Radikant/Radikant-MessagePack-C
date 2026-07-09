@@ -18,18 +18,26 @@ typedef mp_error_t (*mp_stream_read_fn)(mp_stream_t *stream, void *buf,
 typedef mp_error_t (*mp_stream_write_fn)(mp_stream_t *stream, const void *buf,
                                          size_t count);
 typedef mp_error_t (*mp_stream_skip_fn)(mp_stream_t *stream, size_t count);
+typedef mp_error_t (*mp_stream_mark_fn)(mp_stream_t *stream);
+typedef mp_error_t (*mp_stream_reset_fn)(mp_stream_t *stream);
 
 struct mp_stream_s {
   void *context;
   mp_stream_read_fn read;
   mp_stream_write_fn write;
   mp_stream_skip_fn skip;
+  mp_stream_mark_fn mark;
+  mp_stream_reset_fn reset;
 
   // Fast-path I/O for direct memory access (zero-call buffering)
   char *fast_ptr;
   size_t fast_left;
   size_t *fast_size_ptr; // Points to buffer->size (for write) or buffer->offset
                          // (for read)
+                         
+  // Fast-path rewind states
+  char *marked_fast_ptr;
+  size_t marked_fast_left;
 };
 
 // Memory Stream Context
@@ -38,6 +46,7 @@ typedef struct {
   size_t size;
   size_t capacity;
   size_t offset;
+  size_t marked_offset;
   bool is_dynamic;
 } mp_stream_buffer_t;
 
@@ -56,6 +65,10 @@ void mp_memory_stream_destroy(mp_stream_buffer_t *buffer);
 
 // Initializes a stream for reading/writing using standard C FILE* I/O.
 mp_error_t mp_file_stream_init(mp_stream_t *stream, FILE *file);
+
+// Universal stream helpers for rewinding
+mp_error_t mp_stream_mark(mp_stream_t *stream);
+mp_error_t mp_stream_reset(mp_stream_t *stream);
 
 #ifdef __cplusplus
 }

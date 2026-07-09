@@ -5,9 +5,10 @@ add_executable(EXP-BASIC        basic.c)
 add_executable(EXP-ARRAY        array.c)
 add_executable(EXP-BUILDER      builder.c)
 add_executable(EXP-NESTED       nested.c)
-add_executable(EXP-QUERY        query.c)
+
 add_executable(EXP-QUERY-ADVANCED query_advanced.c)
 add_executable(EXP-PRINT        print.c)
+add_executable(EXP-FILTER       filter.c)
 
 # ---- Link Executables ----
 target_link_libraries(EXP-MAP            PRIVATE Radikant-MessagePack-C)
@@ -16,6 +17,7 @@ target_link_libraries(EXP-BASIC          PRIVATE Radikant-MessagePack-C)
 target_link_libraries(EXP-ARRAY          PRIVATE Radikant-MessagePack-C)
 target_link_libraries(EXP-BUILDER        PRIVATE Radikant-MessagePack-C)
 target_link_libraries(EXP-NESTED         PRIVATE Radikant-MessagePack-C)
-target_link_libraries(EXP-QUERY          PRIVATE Radikant-MessagePack-C)
+
 target_link_libraries(EXP-QUERY-ADVANCED PRIVATE Radikant-MessagePack-C)
 target_link_libraries(EXP-PRINT          PRIVATE Radikant-MessagePack-C)
+target_link_libraries(EXP-FILTER         PRIVATE Radikant-MessagePack-C)

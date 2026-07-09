@@ -244,6 +244,46 @@ void gen_mallformed() {
   // 5. Truncated Extension: 0xd4 (Fixext 1) expects 1 byte of type and 1 byte of data. Missing data.
   char trunc_ext[] = {(char)0xd4, (char)0x01}; // Type 1, data missing
   write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_ext.bin", trunc_ext, sizeof(trunc_ext));
+
+  // 6. Truncated Array Elements: Array of size 5, but only 3 elements present.
+  char trunc_array_elements[] = {(char)0x95, 0x01, 0x02, 0x03}; 
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_array_elements.bin", trunc_array_elements, sizeof(trunc_array_elements));
+
+  // 7. Truncated Map Pairs: Map of size 2, but only 3 elements (key, value, key, EOF).
+  char trunc_map_pairs[] = {(char)0x82, (char)0xa4, 'k', 'e', 'y', '1', 0x01, (char)0xa4, 'k', 'e', 'y', '2'};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_map_pairs.bin", trunc_map_pairs, sizeof(trunc_map_pairs));
+
+  // 8. Truncated Float32: 0xca followed by 2 bytes instead of 4.
+  char trunc_float32[] = {(char)0xca, 0x40, 0x49};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_float32.bin", trunc_float32, sizeof(trunc_float32));
+
+  // 9. Truncated Float64: 0xcb followed by 5 bytes instead of 8.
+  char trunc_float64[] = {(char)0xcb, 0x40, 0x09, 0x21, 0xfb, 0x54};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_float64.bin", trunc_float64, sizeof(trunc_float64));
+
+  // 10. Truncated Bin8: 0xc4, len 10, but only 4 bytes follow.
+  char trunc_bin8[] = {(char)0xc4, 0x0a, 0x01, 0x02, 0x03, 0x04};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_bin8.bin", trunc_bin8, sizeof(trunc_bin8));
+
+  // 11. Truncated Str16 Length: 0xda followed by 1 byte instead of 2.
+  char trunc_str16_len[] = {(char)0xda, 0xff};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_str16_len.bin", trunc_str16_len, sizeof(trunc_str16_len));
+
+  // 12. Truncated Array32 Length: 0xdd followed by 3 bytes instead of 4.
+  char trunc_array32_len[] = {(char)0xdd, 0x00, 0xff, 0xff};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_array32_len.bin", trunc_array32_len, sizeof(trunc_array32_len));
+
+  // 13. Ext8 Missing Type: 0xc7, len 5, EOF before type byte.
+  char trunc_ext8_type[] = {(char)0xc7, 0x05};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_ext8_type.bin", trunc_ext8_type, sizeof(trunc_ext8_type));
+
+  // 14. FixExt8 Truncated Data: 0xd7, type 1, but only 4 bytes of data instead of 8.
+  char trunc_fixext8_data[] = {(char)0xd7, 0x01, 0x0a, 0x0b, 0x0c, 0x0d};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_fixext8_data.bin", trunc_fixext8_data, sizeof(trunc_fixext8_data));
+
+  // 15. Deep Array Truncated: 10 levels of array, but no inner element.
+  char trunc_deep_array[] = {(char)0x91, (char)0x91, (char)0x91, (char)0x91, (char)0x91, (char)0x91, (char)0x91, (char)0x91, (char)0x91, (char)0x91};
+  write_raw(PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_deep_array.bin", trunc_deep_array, sizeof(trunc_deep_array));
 }
 
 int main(void) {

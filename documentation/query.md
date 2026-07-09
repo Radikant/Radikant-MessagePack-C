@@ -1,76 +1,86 @@
-# Query API
+# Advanced Query API
 
-The Query API provides high-performance utility functions to search through MessagePack streams for specific elements without allocating memory for an Abstract Syntax Tree (AST).
+The Query API provides high-performance utility functions to search through MessagePack streams for specific elements, often without allocating memory for an Abstract Syntax Tree (AST).
 
-## Why use it?
-- **Zero Allocation**: Like the Skip API, the Query API never dynamically allocates memory. It parses keys into small stack buffers for fast comparisons and skips the rest.
-- **Ease of Use**: Writing manual stream loops to search for map keys or array indices is tedious and error-prone. The Query API handles the jumping and type-checking for you cleanly.
-- **Surgical Extraction**: Allows you to pluck a single nested value out of a multi-gigabyte payload almost instantly.
+## Core Capabilities
+1. **Deep Path Queries (`mp_query_execute`)**: Navigate a multi-level JSON-like path instantly to position the decoder at a nested element.
+2. **Array Filtering (`mp_query_filter_array`)**: Scan arrays for maps that match specific criteria (e.g., `role == "admin"`) and pluck them into an AST, instantly discarding the rest.
+3. **Field Extraction (`mp_query_extract_fields`)**: Pluck only a subset of keys from a large map into an AST, ignoring everything else.
+4. **Single-Element Navigation (`mp_query_map_key_str`, `mp_query_array_index`)**: The lowest-level primitive; jump instantly to a specific map key or array index without allocating memory.
 
+## Stream Rewinding & Re-initialization
 > [!WARNING]
-> **Stream Consumption:** Because the Query API operates on raw streams, searching consumes bytes. If a query fails to find your key (`MP_ERROR_QUERY_NOT_FOUND`), the stream cannot magically rewind itself. The stream will be left positioned exactly at the end of the collection (map or array) that you were searching.
+> **Stream Consumption:** Because the Query API operates on raw streams, searching consumes bytes. You cannot easily rewind the stream after doing complex array filters or query executions. To execute a completely different query on the same payload, it is highly recommended to **re-initialize a fresh zero-allocation decoder** pointing to the exact same buffer.
 
-## Example: Searching a Map
+---
+
+## 1. Deep Path Queries
+Use `mp_query_t` to declare a traversal path, then execute it. The decoder is left positioned exactly at the target element.
 
 ```c
-#include <radikant-messagepack-c.h>
-#include <stdio.h>
+// Example: Drill into `data -> users -> [1]`
+mp_query_t q;
+mp_query_init(&q);
+mp_query_add_path_str(&q, "data");
+mp_query_add_path_str(&q, "users");
+mp_query_add_path_idx(&q, 1);
 
-void search_map_example(const char *buffer, size_t size) {
-    mp_stream_buffer_t dec_buffer;
-    mp_stream_t stream;
-    mp_stream_init_read(&stream, &dec_buffer, buffer, size);
-
-    // Initialize decoder without an allocator (Zero Allocation)
-    mp_decoder_t decoder;
-    mp_decoder_init(&decoder, &stream, NULL); 
-
-    // Search the map for the key "employee_name"
-    if (mp_query_map_key_str(&decoder, "employee_name") == MP_OK) {
-        
-        // The query found it! The decoder is perfectly positioned at the VALUE.
-        // We can now safely read the value using the SAX/Streaming API.
-        uint32_t str_len;
-        if (mp_decode_stream_str_len(&decoder.stream, &str_len) == MP_OK) {
-            char name[64] = {0};
-            decoder.stream.read(&decoder.stream, name, str_len);
-            printf("Found Employee: %s\n", name);
-        }
-    } else {
-        printf("Employee Name key was not found!\n");
-    }
+if (mp_query_execute(&decoder, &q) == MP_OK) {
+    // The decoder is now perfectly positioned at the 2nd user!
+    // You can now decode it into an AST or use the SAX streaming API.
 }
 ```
 
-## Example: Accessing an Array Index
+---
+
+## 2. Array Filtering
+The `mp_filter_t` API enables you to instantly search a massive array of maps for elements matching certain criteria (e.g. searching for a user ID or role). It operates with zero heap allocations until a match is found.
 
 ```c
-#include <radikant-messagepack-c.h>
-#include <stdio.h>
+mp_filter_t filter;
+mp_filter_init(&filter);
+mp_filter_add_str(&filter, "role", "admin");
+// Optional: mp_filter_add_int(&filter, "age", 35); // Supports multiple AND conditions
 
-void access_array_example(const char *buffer, size_t size) {
-    mp_stream_buffer_t dec_buffer;
-    mp_stream_t stream;
-    mp_stream_init_read(&stream, &dec_buffer, buffer, size);
+mp_object_t admins_ast;
+if (mp_query_filter_array(&decoder, &zone, &filter, &admins_ast) == MP_OK) {
+    // admins_ast is now an array containing ONLY the matching objects!
+}
+```
 
-    mp_decoder_t decoder;
-    mp_decoder_init(&decoder, &stream, NULL); 
+---
 
-    // Skip directly to the 5th element in the array (Index 4)
-    if (mp_query_array_index(&decoder, 4) == MP_OK) {
-        
-        // The decoder is positioned at Index 4. 
-        // We can now parse it into a full AST object if we want!
-        mp_zone_t zone;
-        mp_zone_init(&zone, 4096);
-        decoder.zone = &zone; // Attach the memory allocator
-        
-        mp_object_t ast;
-        if (mp_decode(&decoder, &ast) == MP_OK) {
-            printf("Successfully parsed only the 5th element into an AST!\n");
+## 3. Surgical Field Extraction
+Instead of parsing an entire Map object into an AST (which allocates memory for every single key-value pair), use `mp_query_extract_fields` to pluck only the specific keys you care about.
+
+```c
+// Assuming the decoder is positioned at a massive Map...
+const char* fields[] = {"id", "role"};
+mp_object_t extracted_ast;
+
+if (mp_query_extract_fields(&decoder, &zone, fields, 2, &extracted_ast) == MP_OK) {
+    // extracted_ast is a Map containing ONLY "id" and "role".
+}
+```
+
+---
+
+## 4. Single-Element Zero-Allocation Navigation
+For maximum performance and memory efficiency, you can execute simple jumps manually using `mp_query_map_key_str` or `mp_query_array_index`.
+
+```c
+// Jump directly to the "status" key in the current Map
+if (mp_query_map_key_str(&decoder, "status") == MP_OK) {
+    
+    // Decode the string manually via SAX streaming API (No AST allocations!)
+    uint32_t len;
+    if (mp_decode_stream_str_len(&decoder.stream, &len) == MP_OK) {
+        char status_buf[64];
+        if (len < sizeof(status_buf)) {
+            decoder.stream.read(&decoder.stream, status_buf, len);
+            status_buf[len] = '\0';
+            printf("Found status: %s\n", status_buf);
         }
-        
-        mp_zone_destroy(&zone);
     }
 }
 ```

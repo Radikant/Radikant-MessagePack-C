@@ -65,6 +65,47 @@ mp_error_t mp_query_extract_fields(
     mp_object_t* out_map
 );
 
+// -----------------------------------------------------------------------------
+// Array Filtering API (Concept 3: Searching by Value)
+// -----------------------------------------------------------------------------
+
+#define MP_MAX_FILTER_CONDITIONS 8
+
+typedef enum {
+    MP_FILTER_TYPE_INT,
+    MP_FILTER_TYPE_STR,
+    MP_FILTER_TYPE_BOOL
+} mp_filter_cond_type_t;
+
+typedef struct {
+    const char* key;
+    mp_filter_cond_type_t type;
+    union {
+        int64_t i;
+        const char* s;
+        bool b;
+    } expected;
+} mp_filter_condition_t;
+
+typedef struct {
+    mp_filter_condition_t conditions[MP_MAX_FILTER_CONDITIONS];
+    uint32_t count;
+} mp_filter_t;
+
+void mp_filter_init(mp_filter_t* f);
+mp_error_t mp_filter_add_str(mp_filter_t* f, const char* key, const char* val);
+mp_error_t mp_filter_add_int(mp_filter_t* f, const char* key, int64_t val);
+mp_error_t mp_filter_add_bool(mp_filter_t* f, const char* key, bool val);
+
+// Scans an array of maps.
+// Returns an Array AST containing only the maps that matched the filter.
+mp_error_t mp_query_filter_array(
+    mp_decoder_t* decoder, 
+    mp_zone_t* zone, 
+    const mp_filter_t* filter, 
+    mp_object_t* out_array
+);
+
 #ifdef __cplusplus
 }
 #endif

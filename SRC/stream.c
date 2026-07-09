@@ -65,6 +65,24 @@ static mp_error_t mem_skip(mp_stream_t *stream, size_t count) {
   return MP_OK;
 }
 
+static mp_error_t mem_mark(mp_stream_t *stream) {
+  if (!stream || !stream->context) return MP_ERROR_BAD_ARG;
+  mp_stream_buffer_t *buffer = (mp_stream_buffer_t *)stream->context;
+  buffer->marked_offset = buffer->offset;
+  stream->marked_fast_ptr = stream->fast_ptr;
+  stream->marked_fast_left = stream->fast_left;
+  return MP_OK;
+}
+
+static mp_error_t mem_reset(mp_stream_t *stream) {
+  if (!stream || !stream->context) return MP_ERROR_BAD_ARG;
+  mp_stream_buffer_t *buffer = (mp_stream_buffer_t *)stream->context;
+  buffer->offset = buffer->marked_offset;
+  stream->fast_ptr = stream->marked_fast_ptr;
+  stream->fast_left = stream->marked_fast_left;
+  return MP_OK;
+}
+
 mp_error_t mp_stream_init_read(mp_stream_t *stream, mp_stream_buffer_t *buffer,
                                const char *data, size_t size) {
   if (!stream || !buffer)
@@ -73,12 +91,15 @@ mp_error_t mp_stream_init_read(mp_stream_t *stream, mp_stream_buffer_t *buffer,
   buffer->size = size;
   buffer->capacity = size;
   buffer->offset = 0;
+  buffer->marked_offset = 0;
   buffer->is_dynamic = false;
 
   stream->context = buffer;
   stream->read = mem_read;
   stream->write = NULL;
   stream->skip = mem_skip;
+  stream->mark = mem_mark;
+  stream->reset = mem_reset;
 
   stream->fast_ptr = buffer->data;
   stream->fast_left = size;
@@ -96,6 +117,7 @@ mp_error_t mp_stream_init_write(mp_stream_t *stream, mp_stream_buffer_t *buffer,
     buffer->size = 0;
     buffer->capacity = 0;
     buffer->offset = 0;
+    buffer->marked_offset = 0;
     buffer->is_dynamic = true;
 
     stream->fast_ptr = NULL;
@@ -106,6 +128,7 @@ mp_error_t mp_stream_init_write(mp_stream_t *stream, mp_stream_buffer_t *buffer,
     buffer->size = 0;
     buffer->capacity = capacity;
     buffer->offset = 0;
+    buffer->marked_offset = 0;
     buffer->is_dynamic = false;
 
     stream->fast_ptr = buf;
@@ -117,6 +140,8 @@ mp_error_t mp_stream_init_write(mp_stream_t *stream, mp_stream_buffer_t *buffer,
   stream->read = NULL;
   stream->write = mem_write;
   stream->skip = NULL;
+  stream->mark = mem_mark;
+  stream->reset = mem_reset;
 
   return MP_OK;
 }
@@ -172,6 +197,24 @@ static mp_error_t file_skip(mp_stream_t *stream, size_t count) {
   return MP_OK;
 }
 
+static mp_error_t file_mark(mp_stream_t *stream) {
+  if (!stream || !stream->context) return MP_ERROR_BAD_ARG;
+  // Note: fseek/ftell return long, so this is limited to 2GB files on 32-bit systems
+  long pos = ftell((FILE *)stream->context);
+  if (pos < 0) return MP_ERROR_STREAM_UNSUPPORTED; // Cannot ftell
+  stream->marked_fast_left = (size_t)pos; // Repurpose marked_fast_left to hold the file pos
+  return MP_OK;
+}
+
+static mp_error_t file_reset(mp_stream_t *stream) {
+  if (!stream || !stream->context) return MP_ERROR_BAD_ARG;
+  long pos = (long)stream->marked_fast_left;
+  if (fseek((FILE *)stream->context, pos, SEEK_SET) != 0) {
+      return MP_ERROR_STREAM_UNSUPPORTED; // Cannot seek
+  }
+  return MP_OK;
+}
+
 mp_error_t mp_file_stream_init(mp_stream_t *stream, FILE *file) {
   if (!stream || !file)
     return MP_ERROR_STREAM_BAD_ARG;
@@ -179,10 +222,24 @@ mp_error_t mp_file_stream_init(mp_stream_t *stream, FILE *file) {
   stream->read = file_read;
   stream->write = file_write;
   stream->skip = file_skip;
+  stream->mark = file_mark;
+  stream->reset = file_reset;
 
   stream->fast_ptr = NULL;
   stream->fast_left = 0;
   stream->fast_size_ptr = NULL;
 
   return MP_OK;
+}
+
+mp_error_t mp_stream_mark(mp_stream_t *stream) {
+    if (!stream) return MP_ERROR_STREAM_BAD_ARG;
+    if (!stream->mark) return MP_ERROR_STREAM_UNSUPPORTED;
+    return stream->mark(stream);
+}
+
+mp_error_t mp_stream_reset(mp_stream_t *stream) {
+    if (!stream) return MP_ERROR_STREAM_BAD_ARG;
+    if (!stream->reset) return MP_ERROR_STREAM_UNSUPPORTED;
+    return stream->reset(stream);
 }

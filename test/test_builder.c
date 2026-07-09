@@ -105,6 +105,71 @@ bool builder_test_collections(test_result_t *test) {
   return test_end(test);
 }
 
+bool builder_test_collection_helpers(test_result_t *test) {
+  mp_zone_t zone;
+  mp_zone_init(&zone, 1024);
+
+  // Array helpers
+  mp_object_t array;
+  mp_build_array(&zone, &array, 4);
+  mp_array_set_int(&array, 0, 10);
+  mp_array_set_str(&array, 1, "hello");
+  mp_array_set_bool(&array, 2, true);
+  mp_array_set_double(&array, 3, 3.14159);
+
+  EXPECT_TRUE(array.via.array.ptr[0].type == MP_TYPE_POSITIVE_INTEGER, "array_set_int");
+  EXPECT_TRUE(array.via.array.ptr[1].type == MP_TYPE_STR, "array_set_str");
+  EXPECT_TRUE(array.via.array.ptr[2].type == MP_TYPE_BOOLEAN, "array_set_bool");
+  EXPECT_TRUE(array.via.array.ptr[3].type == MP_TYPE_FLOAT64, "array_set_double");
+
+  // Map helpers
+  mp_object_t map;
+  mp_build_map(&zone, &map, 2);
+  mp_map_set_bool(&map, 0, "active", false);
+  mp_map_set_double(&map, 1, "pi", 3.14159);
+
+  EXPECT_TRUE(map.via.map.ptr[0].val.type == MP_TYPE_BOOLEAN, "map_set_bool");
+  EXPECT_TRUE(map.via.map.ptr[1].val.type == MP_TYPE_FLOAT64, "map_set_double");
+
+  mp_zone_destroy(&zone);
+  return test_end(test);
+}
+
+bool builder_test_errors(test_result_t *test) {
+  mp_zone_t zone;
+  mp_zone_init(&zone, 1024);
+
+  mp_object_t array;
+  mp_build_array(&zone, &array, 2);
+
+  mp_object_t val;
+  mp_build_int(&val, 10);
+
+  // Out of bounds array set
+  mp_error_t err = mp_array_set(&array, 2, val);
+  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Out of bounds array set should fail");
+
+  // Out of bounds map set
+  mp_object_t map;
+  mp_build_map(&zone, &map, 1);
+  err = mp_map_set_int(&map, 1, "key", 100);
+  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Out of bounds map set should fail");
+
+  // Not an array/map
+  err = mp_array_set(&val, 0, val);
+  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Setting on non-array should fail");
+
+  err = mp_map_set_str(&val, 0, "key", "v");
+  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Setting on non-map should fail");
+
+  // NULL checks
+  err = mp_array_set(NULL, 0, val);
+  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Setting on NULL array should fail");
+
+  mp_zone_destroy(&zone);
+  return test_end(test);
+}
+
 test_suite_t suite_builder = {.name = "MessagePack Builder API Suite",
                               .standard = "MsgPack-Spec"};
 
@@ -115,6 +180,10 @@ int main(void) {
   add_test(&suite_builder, builder_test_primitives, "Builder API: Primitives",
            "MsgPack-Spec");
   add_test(&suite_builder, builder_test_collections, "Builder API: Collections",
+           "MsgPack-Spec");
+  add_test(&suite_builder, builder_test_collection_helpers, "Builder API: Collection Helpers",
+           "MsgPack-Spec");
+  add_test(&suite_builder, builder_test_errors, "Builder API: Errors & Bounds",
            "MsgPack-Spec");
 
   bool success = run_single_suite(&suite_builder);

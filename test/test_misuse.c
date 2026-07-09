@@ -106,9 +106,9 @@ bool test_misuse_object(test_result_t *test) {
   mp_object_t *elements;
   uint32_t len;
   mp_error_t err = mp_object_as_array(&obj, &elements, &len);
-  if (err != MP_ERROR_DECODE_INVALID_FORMAT)
+  if (err != MP_ERROR_OBJECT_TYPE_MISMATCH)
     append_error(
-        test, "Getting array elements from INT should fail with INVALID_FORMAT",
+        test, "Getting array elements from INT should fail with TYPE_MISMATCH",
         err);
 
   // Try passing NULL pointers
@@ -149,6 +149,43 @@ bool test_misuse_zone(test_result_t *test) {
   return test_end(test);
 }
 
+bool test_misuse_stream(test_result_t *test) {
+  const char data[] = "hello";
+  mp_stream_t stream;
+  mp_stream_buffer_t buffer;
+
+  // 1. Initialize for reading
+  mp_stream_init_read(&stream, &buffer, data, 5);
+
+  // Misuse 1: Passing a NULL buffer to read
+  mp_error_t err = stream.read(&stream, NULL, 5);
+  if (err != MP_ERROR_BAD_ARG)
+    append_error(test, "Expected MP_ERROR_BAD_ARG on NULL buffer", err);
+
+  // Misuse 2: Trying to write to a read-only stream
+  // WARNING: stream.write is NULL for a read stream. Calling it directly would
+  // segfault! Users must check if the function pointer is non-NULL or rely on
+  // higher-level wrappers.
+  if (stream.write != NULL)
+    append_error(test, "Read-only stream should have NULL write function", 0);
+
+  // 2. Initialize for writing (dynamic)
+  mp_stream_init_write(&stream, &buffer, true, NULL, 0);
+
+  // Misuse 3: Trying to read from a write-only stream
+  if (stream.read != NULL)
+    append_error(test, "Write-only stream should have NULL read function", 0);
+
+  // Misuse 4: Write with a NULL buffer but positive count
+  err = stream.write(&stream, NULL, 5);
+  if (err != MP_ERROR_BAD_ARG)
+    append_error(test, "Expected MP_ERROR_BAD_ARG on NULL write buffer", err);
+
+  mp_memory_stream_destroy(&buffer);
+
+  return test_end(test);
+}
+
 test_suite_t suite_misuse = {.name = "MessagePack Misuse Suite",
                              .standard = "MsgPack-Misuse"};
 
@@ -161,6 +198,7 @@ int main(void) {
   add_test(&suite_misuse, test_misuse_sax, "Misuse: SAX API", "Misuse");
   add_test(&suite_misuse, test_misuse_builder, "Misuse: Builder API", "Misuse");
   add_test(&suite_misuse, test_misuse_object, "Misuse: Object API", "Misuse");
+  add_test(&suite_misuse, test_misuse_stream, "Misuse: Stream API", "Misuse");
 
   // Uncommenting this test will crash procces due to missing NULL checks (but
   // is perfectly acceptable) add_test(&suite_misuse, test_misuse_zone, "Misuse:

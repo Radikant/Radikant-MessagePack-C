@@ -125,6 +125,36 @@ bool vector_test_trunc_ext(test_result_t *test) {
       test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_ext.bin",
       MP_ERROR_DECODE_TRUNCATED_EXT);
 }
+bool vector_test_trunc_array_elements(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_array_elements.bin", MP_ERROR_DECODE_INCOMPLETE);
+}
+bool vector_test_trunc_map_pairs(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_map_pairs.bin", MP_ERROR_DECODE_INCOMPLETE);
+}
+bool vector_test_trunc_float32(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_float32.bin", MP_ERROR_DECODE_INCOMPLETE);
+}
+bool vector_test_trunc_float64(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_float64.bin", MP_ERROR_DECODE_INCOMPLETE);
+}
+bool vector_test_trunc_bin8(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_bin8.bin", MP_ERROR_DECODE_TRUNCATED_BIN);
+}
+bool vector_test_trunc_str16_len(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_str16_len.bin", MP_ERROR_DECODE_TRUNCATED_STR);
+}
+bool vector_test_trunc_array32_len(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_array32_len.bin", MP_ERROR_DECODE_TRUNCATED_ARRAY);
+}
+bool vector_test_trunc_ext8_type(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_ext8_type.bin", MP_ERROR_DECODE_TRUNCATED_EXT);
+}
+bool vector_test_trunc_fixext8_data(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_fixext8_data.bin", MP_ERROR_DECODE_TRUNCATED_EXT);
+}
+bool vector_test_trunc_deep_array(test_result_t *test) {
+  return test_vector_file_radikant(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_deep_array.bin", MP_ERROR_DECODE_INCOMPLETE);
+}
 
 // ---------------------------------------------------------
 // Generated Vector Tests (CMP)
@@ -201,6 +231,36 @@ bool cmp_vector_test_trunc_ext(test_result_t *test) {
       test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_ext.bin",
       false);
 }
+bool cmp_vector_test_trunc_array_elements(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_array_elements.bin", false);
+}
+bool cmp_vector_test_trunc_map_pairs(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_map_pairs.bin", false);
+}
+bool cmp_vector_test_trunc_float32(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_float32.bin", false);
+}
+bool cmp_vector_test_trunc_float64(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_float64.bin", false);
+}
+bool cmp_vector_test_trunc_bin8(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_bin8.bin", false);
+}
+bool cmp_vector_test_trunc_str16_len(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_str16_len.bin", false);
+}
+bool cmp_vector_test_trunc_array32_len(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_array32_len.bin", false);
+}
+bool cmp_vector_test_trunc_ext8_type(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_ext8_type.bin", false);
+}
+bool cmp_vector_test_trunc_fixext8_data(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_fixext8_data.bin", false);
+}
+bool cmp_vector_test_trunc_deep_array(test_result_t *test) {
+  return test_vector_file_cmp(test, PROJECT_ROOT "/test/vectors/attack/mallformed/trunc_deep_array.bin", false);
+}
 
 // ---------------------------------------------------------
 
@@ -216,36 +276,46 @@ int main(void) {
   add_test(&suite_vector, test_cross_encode_cmp_decode_radikant,
            "Cross-Validation: Encode CMP -> Decode Radikant", "MsgPack-Spec");
 
-  add_test(&suite_vector, vector_test_simple, "Vector (Radikant): Simple",
+  add_test(&suite_vector, vector_test_simple, "Vector: Simple",
            "MsgPack-Spec");
-  add_test(&suite_vector, vector_test_hard, "Vector (Radikant): Hard",
+  add_test(&suite_vector, vector_test_hard, "Vector: Hard",
            "MsgPack-Spec");
-  add_test(&suite_vector, vector_test_difficult, "Vector (Radikant): Difficult",
+  add_test(&suite_vector, vector_test_difficult, "Vector: Difficult",
            "MsgPack-Spec");
   add_test(&suite_vector, vector_test_depth_bomb,
-           "Vector Attack (Radikant): Depth Bomb", "MsgPack-Spec");
+           "Malicious: Depth Bomb", "MsgPack-Spec");
   add_test(&suite_vector, vector_test_depth_bomb_map,
-           "Vector Attack (Radikant): Map Depth Bomb", "MsgPack-Spec");
+           "Malicious: Map Depth Bomb", "MsgPack-Spec");
   add_test(&suite_vector, vector_test_oom_map,
-           "Vector Attack (Radikant): OOM Map", "MsgPack-Spec");
+           "Malicious: OOM Map", "MsgPack-Spec");
   add_test(&suite_vector, vector_test_oom_array,
-           "Vector Attack (Radikant): OOM Array", "MsgPack-Spec");
+           "Malicious: OOM Array", "MsgPack-Spec");
   add_test(&suite_vector, vector_test_oom_str,
-           "Vector Attack (Radikant): OOM Str", "MsgPack-Spec");
+           "Malicious: OOM Str", "MsgPack-Spec");
   add_test(&suite_vector, vector_test_oom_bin,
-           "Vector Attack (Radikant): OOM Bin", "MsgPack-Spec");
+           "Malicious: OOM Bin", "MsgPack-Spec");
   add_test(&suite_vector, vector_test_oom_ext,
-           "Vector Attack (Radikant): OOM Ext", "MsgPack-Spec");
+           "Malicious: OOM Ext", "MsgPack-Spec");
   add_test(&suite_vector, vector_test_truncated,
-           "Vector Attack (Radikant): Truncated Map", "MsgPack-Spec");
+           "Malformed: Truncated Map", "Adversarial");
   add_test(&suite_vector, vector_test_invalid_tag,
-           "Vector Attack (Radikant): Invalid Tag", "MsgPack-Spec");
+           "Malformed: Invalid Tag", "Adversarial");
   add_test(&suite_vector, vector_test_trunc_uint32,
-           "Vector Attack (Radikant): Trunc UInt32", "MsgPack-Spec");
+           "Malformed: Trunc UInt32", "Adversarial");
   add_test(&suite_vector, vector_test_trunc_str,
-           "Vector Attack (Radikant): Trunc Str", "MsgPack-Spec");
+           "Malformed: Trunc Str", "Adversarial");
   add_test(&suite_vector, vector_test_trunc_ext,
-           "Vector Attack (Radikant): Trunc Ext", "MsgPack-Spec");
+           "Malformed: Truncated Ext", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_array_elements, "Malformed: Trunc Array Elements", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_map_pairs, "Malformed: Trunc Map Pairs", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_float32, "Malformed: Trunc Float32", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_float64, "Malformed: Trunc Float64", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_bin8, "Malformed: Trunc Bin8", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_str16_len, "Malformed: Trunc Str16 Len", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_array32_len, "Malformed: Trunc Array32 Len", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_ext8_type, "Malformed: Trunc Ext8 Type", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_fixext8_data, "Malformed: Trunc FixExt8 Data", "Adversarial");
+  add_test(&suite_vector, vector_test_trunc_deep_array, "Malformed: Trunc Deep Array", "Adversarial");
 
   //   add_test(&suite_vector, cmp_vector_test_simple, "Vector (CMP): Simple",
   //            "MsgPack-Spec");
@@ -277,7 +347,17 @@ int main(void) {
   //   add_test(&suite_vector, cmp_vector_test_trunc_str,
   //            "Vector Attack (CMP): Trunc Str", "MsgPack-Spec");
   //   add_test(&suite_vector, cmp_vector_test_trunc_ext,
-  //            "Vector Attack (CMP): Trunc Ext", "MsgPack-Spec");
+  //            "Vector (CMP): Truncated Ext", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_array_elements, "Vector (CMP): Trunc Array Elements", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_map_pairs, "Vector (CMP): Trunc Map Pairs", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_float32, "Vector (CMP): Trunc Float32", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_float64, "Vector (CMP): Trunc Float64", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_bin8, "Vector (CMP): Trunc Bin8", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_str16_len, "Vector (CMP): Trunc Str16 Len", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_array32_len, "Vector (CMP): Trunc Array32 Len", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_ext8_type, "Vector (CMP): Trunc Ext8 Type", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_fixext8_data, "Vector (CMP): Trunc FixExt8 Data", "Adversarial");
+  //   add_test(&suite_vector, cmp_vector_test_trunc_deep_array, "Vector (CMP): Trunc Deep Array", "Adversarial");
 
   register_suite(&suite_vector);
   bool success = run_all_suites();

@@ -118,20 +118,20 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     return err;
 
   switch (b) {
-  case 0x00 ... MP_TAG_FIXINT_MAX:
+  case 0x00 ... MP_TAG_FIXINT_MAX: // warning: compiler extension
     out_obj->type = MP_TYPE_POSITIVE_INTEGER;
     out_obj->via.u64 = b;
     return MP_OK;
 
-  case MP_TAG_NEGFIXINT_MIN ... 0xFF:
+  case MP_TAG_NEGFIXINT_MIN ... 0xFF: // warning: compiler extension
     out_obj->type = MP_TYPE_NEGATIVE_INTEGER;
     out_obj->via.i64 = (int8_t)b;
     return MP_OK;
 
-  case MP_TAG_FIXSTR_MIN ... MP_TAG_FIXSTR_MAX:
+  case MP_TAG_FIXSTR_MIN ... MP_TAG_FIXSTR_MAX: // warning: compiler extension
     return read_string_to_zone(decoder, out_obj, b & 0x1f);
 
-  case MP_TAG_FIXARRAY_MIN ... MP_TAG_FIXARRAY_MAX: {
+  case MP_TAG_FIXARRAY_MIN ... MP_TAG_FIXARRAY_MAX: { // warning: compiler extension
     uint32_t len = b & 0x0f;
     if ((size_t)len > ((size_t)-1) / sizeof(mp_object_t))
       return MP_ERROR_NOMEM;
@@ -153,7 +153,7 @@ static mp_error_t mp_decode_internal(mp_decoder_t *decoder,
     return MP_OK;
   }
 
-  case MP_TAG_FIXMAP_MIN ... MP_TAG_FIXMAP_MAX: {
+  case MP_TAG_FIXMAP_MIN ... MP_TAG_FIXMAP_MAX: { // warning: compiler extension
     uint32_t len = b & 0x0f;
     if ((size_t)len > ((size_t)-1) / sizeof(mp_object_kv_t))
       return MP_ERROR_NOMEM;
