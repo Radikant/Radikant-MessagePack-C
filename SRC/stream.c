@@ -53,8 +53,8 @@ static mp_error_t mem_skip(mp_stream_t* stream, size_t count) {
     return MP_OK;
 }
 
-void mp_stream_init_read(mp_stream_t* stream, mp_stream_buffer_t* buffer, const char* data, size_t size) {
-    if (!stream || !buffer) return;
+mp_error_t mp_stream_init_read(mp_stream_t* stream, mp_stream_buffer_t* buffer, const char* data, size_t size) {
+    if (!stream || !buffer) return MP_ERROR_STREAM_BAD_ARG;
     buffer->data = (char*)data; // Cast away const, only read will be used.
     buffer->size = size;
     buffer->capacity = size;
@@ -69,10 +69,12 @@ void mp_stream_init_read(mp_stream_t* stream, mp_stream_buffer_t* buffer, const 
     stream->fast_ptr = buffer->data;
     stream->fast_left = size;
     stream->fast_size_ptr = &buffer->offset;
+
+    return MP_OK;
 }
 
-void mp_stream_init_write(mp_stream_t* stream, mp_stream_buffer_t* buffer, bool is_dynamic, char* buf, size_t capacity) {
-    if (!stream || !buffer) return;
+mp_error_t mp_stream_init_write(mp_stream_t* stream, mp_stream_buffer_t* buffer, bool is_dynamic, char* buf, size_t capacity) {
+    if (!stream || !buffer) return MP_ERROR_STREAM_BAD_ARG;
     if (is_dynamic) {
         buffer->data = NULL;
         buffer->size = 0;
@@ -99,6 +101,8 @@ void mp_stream_init_write(mp_stream_t* stream, mp_stream_buffer_t* buffer, bool 
     stream->read = NULL;
     stream->write = mem_write;
     stream->skip = NULL;
+
+    return MP_OK;
 }
 
 void mp_memory_stream_destroy(mp_stream_buffer_t* buffer) {
@@ -141,8 +145,8 @@ static mp_error_t file_skip(mp_stream_t* stream, size_t count) {
     return MP_OK;
 }
 
-void mp_file_stream_init(mp_stream_t* stream, FILE* file) {
-    if (!stream || !file) return;
+mp_error_t mp_file_stream_init(mp_stream_t* stream, FILE* file) {
+    if (!stream || !file) return MP_ERROR_STREAM_BAD_ARG;
     stream->context = file;
     stream->read = file_read;
     stream->write = file_write;
@@ -151,4 +155,6 @@ void mp_file_stream_init(mp_stream_t* stream, FILE* file) {
     stream->fast_ptr = NULL;
     stream->fast_left = 0;
     stream->fast_size_ptr = NULL;
+
+    return MP_OK;
 }

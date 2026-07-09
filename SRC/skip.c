@@ -55,16 +55,9 @@ static mp_error_t stream_read(mp_decoder_t *decoder, void *buf, size_t count) {
   return stream->read(stream, buf, count);
 }
 
-mp_error_t mp_skip(mp_decoder_t *decoder) {
-  if (!decoder)
-    return MP_ERROR_BAD_ARG;
-  if (decoder->depth >= decoder->max_depth)
-    return MP_ERROR_DECODE_DEPTH_EXCEEDED;
+mp_error_t mp_skip_tag(mp_decoder_t *decoder, uint8_t b) {
+  mp_error_t err;
 
-  uint8_t b;
-  mp_error_t err = stream_read(decoder, &b, 1);
-  if (err != MP_OK)
-    return err;
 
   if (b <= MP_TAG_FIXINT_MAX) {
     return MP_OK;
@@ -242,6 +235,20 @@ mp_error_t mp_skip(mp_decoder_t *decoder) {
   default:
     return MP_ERROR_DECODE_INVALID_FORMAT;
   }
+}
+
+mp_error_t mp_skip(mp_decoder_t *decoder) {
+  if (!decoder)
+    return MP_ERROR_BAD_ARG;
+  if (decoder->depth >= decoder->max_depth)
+    return MP_ERROR_DECODE_DEPTH_EXCEEDED;
+
+  uint8_t b;
+  mp_error_t err = stream_read(decoder, &b, 1);
+  if (err != MP_OK)
+    return err;
+    
+  return mp_skip_tag(decoder, b);
 }
 
 mp_error_t mp_skip_memory(const char *data, size_t size) {

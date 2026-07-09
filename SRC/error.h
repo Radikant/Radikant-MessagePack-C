@@ -31,7 +31,18 @@ typedef enum {
     MP_ERROR_ENCODE_INVALID_EXT_TYPE = -34,  // Provided extension type integer is out of protocol bounds
     MP_ERROR_ENCODE_MAP_KEY_TYPE = -35,      // Strict mode: Map key is not a valid type (e.g., non-string)
     MP_ERROR_ENCODE_DEPTH_EXCEEDED = -36,    // Object tree recursion too deep during encoding
-    MP_ERROR_ENCODE_FLOAT_NAN = -37          // Attempted to encode a NaN/Inf float (if strict mode enabled)
+    MP_ERROR_ENCODE_FLOAT_NAN = -37,         // Attempted to encode a NaN/Inf float (if strict mode enabled)
+
+    // Stream Specific Errors
+    MP_ERROR_STREAM_BAD_ARG = -40,           // Passed a NULL stream or buffer to init
+    MP_ERROR_STREAM_NOT_INITIALIZED = -41,   // Tried to read/write but stream is missing read/write function pointers
+    MP_ERROR_STREAM_OPEN_FAIL = -42,         // Failed to open a file/socket stream
+
+    // Object / Builder Specific Errors
+    MP_ERROR_OBJECT_TYPE_MISMATCH = -50,     // Attempted to read an object as a type it is not
+
+    // Query Specific Errors
+    MP_ERROR_QUERY_NOT_FOUND = -60           // The requested key or index was not found in the collection
 } mp_error_t;
 
 #ifdef __cplusplus

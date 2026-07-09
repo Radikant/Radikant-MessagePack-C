@@ -14,7 +14,7 @@ bool test_object_as_int(test_result_t *test) {
     // Type checking
     obj.type = MP_TYPE_STR;
     err = mp_object_as_int(&obj, &val);
-    if (err != MP_ERROR_DECODE_INVALID_FORMAT) append_error(test, "Expected type error", err);
+    if (err != MP_ERROR_OBJECT_TYPE_MISMATCH) append_error(test, "Expected type error", err);
     
     return test_end(test);
 }
@@ -39,7 +39,7 @@ bool test_object_as_uint(test_result_t *test) {
     // Fails on negative INT
     obj.via.i64 = -1;
     err = mp_object_as_uint(&obj, &val);
-    if (err != MP_ERROR_DECODE_INVALID_FORMAT) append_error(test, "Expected type error for negative int", err);
+    if (err != MP_ERROR_OBJECT_TYPE_MISMATCH) append_error(test, "Expected type error for negative int", err);
     
     return test_end(test);
 }

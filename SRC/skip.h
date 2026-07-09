@@ -12,6 +12,9 @@ extern "C" {
 // Skips the next MessagePack object in the decoder stream without allocating memory.
 mp_error_t mp_skip(mp_decoder_t* decoder);
 
+// Skips the next MessagePack object, assuming the initial tag byte has already been read.
+mp_error_t mp_skip_tag(mp_decoder_t* decoder, uint8_t tag);
+
 // Skips a complete MessagePack payload without allocating any memory.
 mp_error_t mp_skip_memory(const char* data, size_t size);
 

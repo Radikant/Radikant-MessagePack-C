@@ -36,6 +36,7 @@ add_library(Radikant-MessagePack-C SHARED
     SRC/error.c
     SRC/stream.c
     SRC/builder.c
+    SRC/query.c
 )
 
 # ---- Includess ----
