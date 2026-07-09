@@ -15,6 +15,7 @@ add_executable(TST-STREAM           test_stream.c)
 add_executable(TST-OBJECT           test_object.c)
 add_executable(TST-MISUSE           test_misuse.c)
 add_executable(TST-QUERY            test_query.c)
+add_executable(TST-EQUAL            test_equal.c)
 
 target_compile_definitions(TST-VECTOR PRIVATE PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 target_compile_definitions(GENERATE-VECTORS PRIVATE PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
@@ -34,6 +35,7 @@ target_link_libraries(TST-STREAM       PRIVATE Radikant-MessagePack-C Radikant-P
 target_link_libraries(TST-OBJECT       PRIVATE Radikant-MessagePack-C Radikant-Probe-C)
 target_link_libraries(TST-MISUSE       PRIVATE Radikant-MessagePack-C Radikant-Probe-C)
 target_link_libraries(TST-QUERY        PRIVATE Radikant-MessagePack-C Radikant-Probe-C)
+target_link_libraries(TST-EQUAL        PRIVATE Radikant-MessagePack-C Radikant-Probe-C cmp mpack)
 
 # Provide the project root so tests can load external files
 target_compile_definitions(TST-PERF         PRIVATE PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
@@ -54,3 +56,4 @@ add_test(NAME TST-STREAM       COMMAND TST-STREAM)
 add_test(NAME TST-OBJECT       COMMAND TST-OBJECT)
 add_test(NAME TST-MISUSE       COMMAND TST-MISUSE)
 add_test(NAME TST-QUERY        COMMAND TST-QUERY)
+add_test(NAME TST-EQUAL        COMMAND TST-EQUAL)

@@ -147,24 +147,24 @@ bool builder_test_errors(test_result_t *test) {
 
   // Out of bounds array set
   mp_error_t err = mp_array_set(&array, 2, val);
-  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Out of bounds array set should fail");
+  EXPECT_TRUE(err == MP_ERROR_OBJECT_OUT_OF_BOUNDS, "Out of bounds array set should fail");
 
   // Out of bounds map set
   mp_object_t map;
   mp_build_map(&zone, &map, 1);
   err = mp_map_set_int(&map, 1, "key", 100);
-  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Out of bounds map set should fail");
+  EXPECT_TRUE(err == MP_ERROR_OBJECT_OUT_OF_BOUNDS, "Out of bounds map set should fail");
 
   // Not an array/map
   err = mp_array_set(&val, 0, val);
-  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Setting on non-array should fail");
+  EXPECT_TRUE(err == MP_ERROR_OBJECT_TYPE_MISMATCH, "Setting on non-array should fail");
 
   err = mp_map_set_str(&val, 0, "key", "v");
-  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Setting on non-map should fail");
+  EXPECT_TRUE(err == MP_ERROR_OBJECT_TYPE_MISMATCH, "Setting on non-map should fail");
 
   // NULL checks
   err = mp_array_set(NULL, 0, val);
-  EXPECT_TRUE(err == MP_ERROR_BAD_ARG, "Setting on NULL array should fail");
+  EXPECT_TRUE(err == MP_ERROR_OBJECT_NULL_POINTER, "Setting on NULL array should fail");
 
   mp_zone_destroy(&zone);
   return test_end(test);

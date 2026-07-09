@@ -1,7 +1,7 @@
 #include "builder.h"
 
 mp_error_t mp_build_array(mp_zone_t* zone, mp_object_t* obj, uint32_t size) {
-    if (!zone || !obj) return MP_ERROR_BAD_ARG;
+    if (!zone || !obj) return MP_ERROR_OBJECT_NULL_POINTER;
     
     obj->type = MP_TYPE_ARRAY;
     obj->via.array.size = size;
@@ -22,7 +22,7 @@ mp_error_t mp_build_array(mp_zone_t* zone, mp_object_t* obj, uint32_t size) {
 }
 
 mp_error_t mp_build_map(mp_zone_t* zone, mp_object_t* obj, uint32_t size) {
-    if (!zone || !obj) return MP_ERROR_BAD_ARG;
+    if (!zone || !obj) return MP_ERROR_OBJECT_NULL_POINTER;
     
     obj->type = MP_TYPE_MAP;
     obj->via.map.size = size;

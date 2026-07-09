@@ -67,12 +67,12 @@ bool test_misuse_builder(test_result_t *test) {
   mp_object_t obj;
 
   mp_error_t err = mp_build_array(NULL, &obj, 5);
-  if (err != MP_ERROR_BAD_ARG)
-    append_error(test, "mp_build_array(NULL zone) should return BAD_ARG", err);
+  if (err != MP_ERROR_OBJECT_NULL_POINTER)
+    append_error(test, "mp_build_array(NULL zone) should return NULL_POINTER", err);
 
   err = mp_build_array(&zone, NULL, 5);
-  if (err != MP_ERROR_BAD_ARG)
-    append_error(test, "mp_build_array(NULL obj) should return BAD_ARG", err);
+  if (err != MP_ERROR_OBJECT_NULL_POINTER)
+    append_error(test, "mp_build_array(NULL obj) should return NULL_POINTER", err);
 
   // Out of bounds setter misuse
   mp_build_array(&zone, &obj, 2); // Array of size 2
@@ -81,15 +81,15 @@ bool test_misuse_builder(test_result_t *test) {
 
   // Try setting index 5 on an array of size 2
   err = mp_array_set(&obj, 5, item);
-  if (err != MP_ERROR_BAD_ARG)
-    append_error(test, "mp_array_set out-of-bounds should return BAD_ARG", err);
+  if (err != MP_ERROR_OBJECT_OUT_OF_BOUNDS)
+    append_error(test, "mp_array_set out-of-bounds should return OUT_OF_BOUNDS", err);
 
   // Try setting an element on a non-array object
   mp_object_t not_array;
   mp_build_int(&not_array, 42);
   err = mp_array_set(&not_array, 0, item);
-  if (err != MP_ERROR_BAD_ARG)
-    append_error(test, "mp_array_set on INT object should return BAD_ARG", err);
+  if (err != MP_ERROR_OBJECT_TYPE_MISMATCH)
+    append_error(test, "mp_array_set on INT object should return TYPE_MISMATCH", err);
 
   mp_zone_destroy(&zone);
   return test_end(test);

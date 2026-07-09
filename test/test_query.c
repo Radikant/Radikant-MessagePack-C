@@ -133,7 +133,7 @@ bool test_query_type_mismatch(test_result_t *test) {
   mp_decoder_init(&decoder, &stream, NULL);
 
   mp_error_t err = mp_query_map_key_str(&decoder, "foo");
-  if (err != MP_ERROR_DECODE_INVALID_FORMAT) {
+  if (err != MP_ERROR_QUERY_TYPE_MISMATCH) {
     append_error(test, "Expected type mismatch when querying array as map",
                  err);
   }
@@ -471,8 +471,8 @@ bool test_query_max_limits(test_result_t *test) {
     for (int i=0; i<MP_MAX_QUERY_DEPTH; i++) {
         mp_query_add_path_str(&q, "x");
     }
-    if (mp_query_add_path_str(&q, "overflow") != MP_ERROR_BAD_ARG) {
-        append_error(test, "Expected BAD_ARG when exceeding max query depth", 0);
+    if (mp_query_add_path_str(&q, "overflow") != MP_ERROR_QUERY_MAX_DEPTH) {
+        append_error(test, "Expected MAX_DEPTH when exceeding max query depth", 0);
     }
     
     mp_filter_t f;

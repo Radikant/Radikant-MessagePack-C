@@ -9,8 +9,11 @@ mp_error_t mp_query_map_key_str(mp_decoder_t *decoder, const char *search_key) {
 
   uint32_t map_len;
   mp_error_t err = mp_decode_stream_map_len(decoder->stream, &map_len);
-  if (err != MP_OK)
-    return err;
+  if (err == MP_ERROR_DECODE_INVALID_FORMAT) {
+      return MP_ERROR_QUERY_TYPE_MISMATCH;
+  } else if (err != MP_OK) {
+      return err;
+  }
 
   size_t target_len = strlen(search_key);
 
@@ -113,8 +116,11 @@ mp_error_t mp_query_array_index(mp_decoder_t *decoder, uint32_t target_index) {
 
   uint32_t array_len;
   mp_error_t err = mp_decode_stream_array_len(decoder->stream, &array_len);
-  if (err != MP_OK)
-    return err;
+  if (err == MP_ERROR_DECODE_INVALID_FORMAT) {
+      return MP_ERROR_QUERY_TYPE_MISMATCH;
+  } else if (err != MP_OK) {
+      return err;
+  }
 
   if (target_index >= array_len) {
     // Index out of bounds, consume the whole array to leave stream cleanly
@@ -150,7 +156,7 @@ mp_error_t mp_query_add_path_str(mp_query_t *q, const char *key) {
   if (!q || !key)
     return MP_ERROR_BAD_ARG;
   if (q->count >= MP_MAX_QUERY_DEPTH)
-    return MP_ERROR_BAD_ARG; // Max depth reached
+    return MP_ERROR_QUERY_MAX_DEPTH; // Max depth reached
   q->steps[q->count].type = MP_QUERY_PATH_STR;
   q->steps[q->count].via.str = key;
   q->count++;
@@ -161,7 +167,7 @@ mp_error_t mp_query_add_path_idx(mp_query_t *q, uint32_t index) {
   if (!q)
     return MP_ERROR_BAD_ARG;
   if (q->count >= MP_MAX_QUERY_DEPTH)
-    return MP_ERROR_BAD_ARG; // Max depth reached
+    return MP_ERROR_QUERY_MAX_DEPTH; // Max depth reached
   q->steps[q->count].type = MP_QUERY_PATH_INDEX;
   q->steps[q->count].via.index = index;
   q->count++;

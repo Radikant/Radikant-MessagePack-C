@@ -101,17 +101,17 @@ mp_error_t mp_build_map(mp_zone_t* zone, mp_object_t* obj, uint32_t size);
 // ---------------------------------------------------------
 
 static inline mp_error_t mp_array_set(mp_object_t* array_obj, uint32_t index, mp_object_t val) {
-    if (!array_obj || array_obj->type != MP_TYPE_ARRAY || index >= array_obj->via.array.size) {
-        return MP_ERROR_BAD_ARG;
-    }
+    if (!array_obj) return MP_ERROR_OBJECT_NULL_POINTER;
+    if (array_obj->type != MP_TYPE_ARRAY) return MP_ERROR_OBJECT_TYPE_MISMATCH;
+    if (index >= array_obj->via.array.size) return MP_ERROR_OBJECT_OUT_OF_BOUNDS;
     array_obj->via.array.ptr[index] = val;
     return MP_OK;
 }
 
 static inline mp_error_t mp_map_set(mp_object_t* map_obj, uint32_t index, mp_object_t key, mp_object_t val) {
-    if (!map_obj || map_obj->type != MP_TYPE_MAP || index >= map_obj->via.map.size) {
-        return MP_ERROR_BAD_ARG;
-    }
+    if (!map_obj) return MP_ERROR_OBJECT_NULL_POINTER;
+    if (map_obj->type != MP_TYPE_MAP) return MP_ERROR_OBJECT_TYPE_MISMATCH;
+    if (index >= map_obj->via.map.size) return MP_ERROR_OBJECT_OUT_OF_BOUNDS;
     map_obj->via.map.ptr[index].key = key;
     map_obj->via.map.ptr[index].val = val;
     return MP_OK;

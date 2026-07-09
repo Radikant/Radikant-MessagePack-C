@@ -239,12 +239,12 @@ bool msgpack_test_type_casting(test_result_t *test) {
   obj.via.str.ptr = "hello";
 
   int64_t i_val;
-  if (mp_object_as_int(&obj, &i_val) != MP_ERROR_DECODE_INVALID_FORMAT) {
+  if (mp_object_as_int(&obj, &i_val) != MP_ERROR_OBJECT_TYPE_MISMATCH) {
     append_error(test, "String cast to Int did not safely fail", 0);
   }
 
   bool b_val;
-  if (mp_object_as_bool(&obj, &b_val) != MP_ERROR_DECODE_INVALID_FORMAT) {
+  if (mp_object_as_bool(&obj, &b_val) != MP_ERROR_OBJECT_TYPE_MISMATCH) {
     append_error(test, "String cast to Bool did not safely fail", 0);
   }
 
