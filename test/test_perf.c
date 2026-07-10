@@ -180,7 +180,7 @@ void comp_diff_radikant(perf_result_t *res) {
   clock_t start = clock();
   for (int i = 0; i < ITERS_DIFF; i++) {
     mp_zone_t zone;
-    mp_zone_init(&zone, 32768);
+    mp_zone_init(&zone, 131072);
 
     mp_stream_buffer_t mem_buffer;
     mp_stream_t stream;
@@ -561,6 +561,51 @@ void skip_diff_radikant(perf_result_t *res) {
   perf_record_speed(res, mb / elapsed);
 }
 
+void skip_simple_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_SIMPLE; i++) {
+    mpack_reader_t reader;
+    mpack_reader_init_data(&reader, buf_simple, size_simple);
+    mpack_discard(&reader);
+    mpack_error_t err = mpack_reader_destroy(&reader);
+    assert(err == mpack_ok);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_simple * ITERS_SIMPLE) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+void skip_hard_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_HARD; i++) {
+    mpack_reader_t reader;
+    mpack_reader_init_data(&reader, buf_hard, size_hard);
+    mpack_discard(&reader);
+    mpack_error_t err = mpack_reader_destroy(&reader);
+    assert(err == mpack_ok);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_hard * ITERS_HARD) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
+void skip_diff_mpack(perf_result_t *res) {
+  clock_t start = clock();
+  for (int i = 0; i < ITERS_DIFF; i++) {
+    mpack_reader_t reader;
+    mpack_reader_init_data(&reader, buf_diff, size_diff);
+    mpack_discard(&reader);
+    mpack_error_t err = mpack_reader_destroy(&reader);
+    assert(err == mpack_ok);
+  }
+  clock_t end = clock();
+  double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+  double mb = (double)(size_diff * ITERS_DIFF) / (1024.0 * 1024.0);
+  perf_record_speed(res, mb / elapsed);
+}
+
 int main() {
   buf_simple = read_file_to_mem(
       PROJECT_ROOT "/test/vectors/test/simple/simple1.bin", &size_simple);
@@ -644,15 +689,21 @@ int main() {
 
   add_perf_test(&skip_suite, false, true, "SIMPLE VECTOR", "cmp",
                 comp_simple_cmp); // CMP decodes by skipping
+  add_perf_test(&skip_suite, false, true, "SIMPLE VECTOR", "mpack",
+                skip_simple_mpack);
   add_perf_test(&skip_suite, true, true, "SIMPLE VECTOR", "radikant",
                 skip_simple_radikant);
 
   add_perf_test(&skip_suite, false, true, "HARD VECTOR", "cmp", comp_hard_cmp);
+  add_perf_test(&skip_suite, false, true, "HARD VECTOR", "mpack",
+                skip_hard_mpack);
   add_perf_test(&skip_suite, true, true, "HARD VECTOR", "radikant",
                 skip_hard_radikant);
 
   add_perf_test(&skip_suite, false, true, "DIFFICULT VECTOR", "cmp",
                 comp_diff_cmp);
+  add_perf_test(&skip_suite, false, true, "DIFFICULT VECTOR", "mpack",
+                skip_diff_mpack);
   add_perf_test(&skip_suite, true, true, "DIFFICULT VECTOR", "radikant",
                 skip_diff_radikant);
 

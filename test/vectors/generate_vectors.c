@@ -110,65 +110,148 @@ void gen_hard(cmp_ctx_t *cmp) {
 }
 
 void gen_difficult(cmp_ctx_t *cmp) {
-  // Top level array of 4 complex elements
-  cmp_write_array(cmp, 4);
+  // Top level: array of 5 complex elements (~35KB total)
+  cmp_write_array(cmp, 5);
 
-  // Element 1: Deeply nested Maps and Arrays
-  cmp_write_map(cmp, 3);
-  
-  // Key 1: integer -> Value 1: Map
-  cmp_write_integer(cmp, -999);
-  cmp_write_map(cmp, 1);
-  cmp_write_str(cmp, "deep_key", 8);
-  cmp_write_array(cmp, 5); // 5 elements inside
-  cmp_write_nil(cmp);
-  cmp_write_true(cmp);
-  cmp_write_float(cmp, -1.2345f);
-  
-  char ext_data1[] = "EXT";
-  cmp_write_ext(cmp, 42, 3, ext_data1);
-  
-  char bin_data1[] = "BLOB";
-  cmp_write_bin(cmp, bin_data1, 4);
+  // ---------------------------------------------------------------
+  // Element 1: Deep nesting - 30 levels alternating map/array
+  // Each level carries real payload, not just empty wrappers.
+  // map{level:N, child: array[padding, <next>]}
+  // ---------------------------------------------------------------
+  int depth = 30;
+  for (int i = 0; i < depth; i++) {
+    if (i % 2 == 0) {
+      cmp_write_map(cmp, 2);
+      cmp_write_str(cmp, "level", 5);
+      cmp_write_integer(cmp, i);
+      cmp_write_str(cmp, "child", 5);
+    } else {
+      cmp_write_array(cmp, 2);
+      cmp_write_str(cmp, "padding_data", 12);
+    }
+  }
+  cmp_write_str(cmp, "leaf", 4); // innermost value
 
-  // Key 2: string -> Value 2: Array of Maps
-  cmp_write_str(cmp, "array_of_maps", 13);
-  cmp_write_array(cmp, 2);
-  cmp_write_map(cmp, 1);
-  cmp_write_false(cmp);
-  cmp_write_integer(cmp, 100);
-  cmp_write_map(cmp, 1);
-  cmp_write_str(cmp, "xyz", 3);
-  cmp_write_double(cmp, 3.1415926535);
-
-  // Key 3: Map -> Value 3: Array (Testing complex keys)
-  cmp_write_map(cmp, 1);
-  cmp_write_integer(cmp, 42);
-  cmp_write_str(cmp, "universe", 8);
-  cmp_write_array(cmp, 0);
-
-  // Element 2: Giant alternating Array
-  cmp_write_array(cmp, 100);
+  // ---------------------------------------------------------------
+  // Element 2: Wide map - 100 keys, cycling through 8 value types
+  // Forces constant type-dispatch switching per key.
+  // ---------------------------------------------------------------
+  cmp_write_map(cmp, 100);
   for (int i = 0; i < 100; i++) {
-    if (i % 4 == 0) cmp_write_integer(cmp, i);
-    else if (i % 4 == 1) cmp_write_str(cmp, "x", 1);
-    else if (i % 4 == 2) cmp_write_map(cmp, 0);
-    else cmp_write_array(cmp, 0);
+    char key[32];
+    int key_len = snprintf(key, sizeof(key), "field_%03d", i);
+    cmp_write_str(cmp, key, key_len);
+
+    switch (i % 8) {
+    case 0:
+      cmp_write_integer(cmp, i * 7919);
+      break;
+    case 1:
+      cmp_write_double(cmp, (double)i * 0.123456789);
+      break;
+    case 2:
+      cmp_write_array(cmp, 5);
+      for (int j = 0; j < 5; j++)
+        cmp_write_integer(cmp, j * i);
+      break;
+    case 3: {
+      char blob[64];
+      memset(blob, (char)i, sizeof(blob));
+      cmp_write_bin(cmp, blob, (uint32_t)((i % 7 + 1) * 8));
+      break;
+    }
+    case 4:
+      cmp_write_bool(cmp, i % 3 == 0);
+      break;
+    case 5:
+      cmp_write_nil(cmp);
+      break;
+    case 6:
+      cmp_write_map(cmp, 3);
+      cmp_write_str(cmp, "a", 1);
+      cmp_write_integer(cmp, i);
+      cmp_write_str(cmp, "b", 1);
+      cmp_write_float(cmp, (float)i);
+      cmp_write_str(cmp, "c", 1);
+      cmp_write_str(cmp, "val", 3);
+      break;
+    case 7: {
+      char ext[16];
+      memset(ext, 0xAB, sizeof(ext));
+      cmp_write_ext(cmp, (int8_t)(i % 127), 16, ext);
+      break;
+    }
+    }
   }
 
-  // Element 3: Ext nested in a map
-  cmp_write_map(cmp, 1);
-  char ext_z[] = "Z";
-  cmp_write_ext(cmp, 99, 1, ext_z);
-  char ext_zz[] = "ZZ";
-  cmp_write_ext(cmp, 100, 2, ext_zz);
+  // ---------------------------------------------------------------
+  // Element 3: Jagged array - 20 sub-arrays, each containing 1-10
+  // maps with 4 fields + 128-byte bin payload. Irregular shape
+  // prevents any stride-based optimization.
+  // ---------------------------------------------------------------
+  cmp_write_array(cmp, 20);
+  for (int i = 0; i < 20; i++) {
+    int inner_count = (i % 10) + 1;
+    cmp_write_array(cmp, inner_count);
+    for (int j = 0; j < inner_count; j++) {
+      cmp_write_map(cmp, 4);
 
-  // Element 4: Binary key with a Nil value
-  cmp_write_map(cmp, 1);
-  char bin_data[256];
-  for (int i = 0; i < 256; i++) bin_data[i] = (char)i;
-  cmp_write_bin(cmp, bin_data, 256);
-  cmp_write_nil(cmp);
+      cmp_write_str(cmp, "id", 2);
+      cmp_write_integer(cmp, i * 100 + j);
+
+      cmp_write_str(cmp, "name", 4);
+      char name[32];
+      int name_len = snprintf(name, sizeof(name), "item_%d_%d", i, j);
+      cmp_write_str(cmp, name, name_len);
+
+      cmp_write_str(cmp, "tags", 4);
+      cmp_write_array(cmp, 3);
+      cmp_write_str(cmp, "fast", 4);
+      cmp_write_str(cmp, "small", 5);
+      cmp_write_str(cmp, "safe", 4);
+
+      cmp_write_str(cmp, "data", 4);
+      char bin[128];
+      memset(bin, (char)(i ^ j), 128);
+      cmp_write_bin(cmp, bin, 128);
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Element 4: Payload stress - alternating large strings (256-1024
+  // bytes) and tiny integers. Forces the decoder to constantly
+  // switch between skipping big blobs and parsing small headers.
+  // ---------------------------------------------------------------
+  cmp_write_array(cmp, 40);
+  for (int i = 0; i < 40; i++) {
+    if (i % 2 == 0) {
+      int size = 256 + (i * 23) % 769;
+      char big[1024];
+      memset(big, 'A' + (i % 26), size);
+      cmp_write_str(cmp, big, size);
+    } else {
+      cmp_write_integer(cmp, i);
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Element 5: Complex key types - array and ext keys in a map.
+  // Most parsers optimize for string keys; this forces the slow path.
+  // ---------------------------------------------------------------
+  cmp_write_map(cmp, 10);
+  for (int i = 0; i < 10; i++) {
+    cmp_write_array(cmp, 2);
+    cmp_write_str(cmp, "key", 3);
+    cmp_write_integer(cmp, i);
+
+    cmp_write_map(cmp, 2);
+    cmp_write_integer(cmp, 0);
+    cmp_write_double(cmp, 3.14 * i);
+    cmp_write_integer(cmp, 1);
+    char ext[8];
+    memset(ext, (char)i, 8);
+    cmp_write_ext(cmp, (int8_t)i, 8, ext);
+  }
 }
 
 void write_raw(const char *path, const char *data, size_t len) {
